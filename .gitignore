@@ -25,7 +25,11 @@ yarn-error.log*
 
 # database
 prisma/*.db
+# dev.db is committed so Vercel has data at runtime (refreshed by the data pipeline)
+!prisma/dev.db
 prisma/*.db-journal
+prisma/*.db-wal
+prisma/*.db-shm
 /data/*.db
 *.sqlite
 
