@@ -9,15 +9,6 @@ on:
     # run on weekdays, so a daily pull keeps votes and bills current.
     - cron: "0 12 * * *"
   workflow_dispatch:
-    inputs:
-      max_meetings:
-        description: "How many recent meetings to ingest"
-        required: false
-        default: "40"
-      years:
-        description: "Comma-separated years to crawl (blank = current year)"
-        required: false
-        default: ""
 
 concurrency:
   group: data-refresh
@@ -33,9 +24,7 @@ jobs:
     env:
       DATABASE_URL: "file:./dev.db"
       LEGISTAR_HOST: "https://sfgov.legistar.com"
-      INGEST_MAX_MEETINGS: ${{ github.event.inputs.max_meetings || '40' }}
-      INGEST_YEARS: ${{ github.event.inputs.years || '' }}
-      # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}  # optional: richer summaries
+      INGEST_MAX_MEETINGS: "40"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,7 +32,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "20"
           cache: npm
 
       - name: Install dependencies
