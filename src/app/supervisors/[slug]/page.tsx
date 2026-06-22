@@ -75,7 +75,7 @@ export default async function SupervisorPage({
       {/* Hero */}
       <section className="nb-card overflow-hidden">
         <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8">
-          <Avatar name={sup.fullName} district={sup.district} size={88} />
+          <Avatar name={sup.fullName} district={sup.district} photoUrl={sup.photoUrl} size={128} />
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="rounded border border-line-strong px-2 py-0.5 font-mono text-xs font-semibold text-ink">

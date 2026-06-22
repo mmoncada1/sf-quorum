@@ -20,7 +20,7 @@ import {
   getActionVotes,
   type MeetingRef,
 } from "../src/lib/legistar";
-import { ROSTER, matchRoster } from "../src/lib/roster";
+import { ROSTER, matchRoster, photoFor } from "../src/lib/roster";
 import { TOPICS } from "../src/lib/topics";
 
 const YEARS = (process.env.INGEST_YEARS || String(new Date().getFullYear()))
@@ -49,6 +49,7 @@ async function ensureRoster() {
         email: r.email,
         active: true,
         website: "https://sfbos.org/",
+        photoUrl: photoFor(r.slug),
       },
       update: {
         fullName: r.fullName,
@@ -56,6 +57,7 @@ async function ensureRoster() {
         title: r.title,
         email: r.email,
         active: true,
+        photoUrl: photoFor(r.slug),
       },
     });
   }

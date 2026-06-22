@@ -50,7 +50,7 @@ export default async function LeaderboardPage() {
                     <div className="w-7 shrink-0 text-center font-mono text-xl font-bold tabular-nums text-faint">
                       {st.rank}
                     </div>
-                    <Avatar name={s.fullName} district={s.district} size={48} />
+                    <Avatar name={s.fullName} district={s.district} photoUrl={s.photoUrl} size={68} />
                     <div className="min-w-0">
                       <div className="truncate font-semibold text-ink">
                         {s.fullName}

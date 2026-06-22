@@ -173,7 +173,8 @@ export default async function MatterPage({
                         <Avatar
                           name={v.supervisor.fullName}
                           district={v.supervisor.district}
-                          size={30}
+                          photoUrl={v.supervisor.photoUrl}
+                          size={44}
                         />
                         <div className="min-w-0 flex-1">
                           <div className="truncate text-xs font-medium text-ink">

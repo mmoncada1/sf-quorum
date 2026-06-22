@@ -118,7 +118,7 @@ export default async function HomePage() {
                     {ordinal(i + 1)}
                   </span>
                   <div className="flex items-center gap-3">
-                    <Avatar name={s.fullName} district={s.district} size={44} />
+                    <Avatar name={s.fullName} district={s.district} photoUrl={s.photoUrl} size={64} />
                     <div className="min-w-0">
                       <div className="truncate font-semibold text-ink">
                         {s.fullName}

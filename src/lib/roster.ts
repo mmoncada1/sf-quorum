@@ -14,6 +14,11 @@ export interface RosterEntry {
   aliases: string[];
 }
 
+/** Local headshot path for a roster slug (official portrait from sfbos.org / sf.gov). */
+export function photoFor(slug: string): string {
+  return `/images/supervisors/${slug}.png`;
+}
+
 export const ROSTER: RosterEntry[] = [
   {
     slug: "connie-chan",

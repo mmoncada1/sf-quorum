@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { blockColor, gradeBg, initials, scoreFill, statusTone, voteBg } from "@/lib/format";
 import { AnimatedBar } from "./motion";
 
@@ -6,11 +7,25 @@ export function Avatar({
   name,
   size = 44,
   district,
+  photoUrl,
 }: {
   name: string;
   size?: number;
   district?: number | null;
+  photoUrl?: string | null;
 }) {
+  if (photoUrl) {
+    return (
+      <Image
+        src={photoUrl}
+        alt={name}
+        width={size}
+        height={size}
+        className="shrink-0 rounded-lg object-cover"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
   return (
     <span
       className="flex shrink-0 items-center justify-center rounded-lg font-display font-bold leading-none text-paper"

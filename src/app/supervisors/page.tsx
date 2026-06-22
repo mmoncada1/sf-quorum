@@ -33,7 +33,7 @@ export default async function SupervisorsPage() {
           >
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <Avatar name={s.fullName} district={s.district} size={48} />
+                <Avatar name={s.fullName} district={s.district} photoUrl={s.photoUrl} size={68} />
                 <div>
                   <div className="font-semibold text-ink">{s.fullName}</div>
                   <div className="text-xs text-muted">District {s.district}</div>
