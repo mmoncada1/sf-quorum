@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getLeaderboard } from "@/lib/queries";
 import { Avatar, GradeBadge, ScoreNumber, StatBar, TopicChip } from "@/components/ui";
+import { Reveal } from "@/components/motion";
 import { pct } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -19,8 +20,9 @@ export default async function LeaderboardPage() {
           Eleven supervisors, one scoreboard. Every member of the Board is graded
           on what they actually produce: substantive legislation passed, bills
           authored, attendance at the dais, and willingness to break from the
-          pack. Symbolic resolutions count for little. Scores are relative, so the
-          category leader sets the 100.
+          pack. Symbolic and procedural resolutions count for little. Impact,
+          Activity, and Attendance are scored against fixed targets, so a grade
+          means the same thing no matter who else is on the Board.
         </p>
       </header>
 
@@ -33,11 +35,12 @@ export default async function LeaderboardPage() {
           .
         </div>
       ) : (
-        <ol className="overflow-hidden rounded-lg border border-line bg-surface">
-          {leaders.map((s) => {
+        <ol className="overflow-hidden rounded-xl border border-line bg-surface">
+          {leaders.map((s, i) => {
             const st = s.stats!;
             return (
               <li key={s.id} className="border-b border-line last:border-0">
+                <Reveal delay={Math.min(i, 8) * 0.05}>
                 <Link
                   href={`/supervisors/${s.slug}`}
                   className="group flex flex-col gap-5 p-5 transition-colors hover:bg-paper lg:flex-row lg:items-center"
@@ -90,6 +93,7 @@ export default async function LeaderboardPage() {
                     <Count label="Att." value={pct(st.attendanceRate)} />
                   </div>
                 </Link>
+                </Reveal>
               </li>
             );
           })}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { blockColor, gradeBg, initials, scoreFill, statusTone, voteBg } from "@/lib/format";
+import { AnimatedBar } from "./motion";
 
 export function Avatar({
   name,
@@ -75,12 +76,7 @@ export function StatBar({
           {hint ? <span className="ml-0.5 text-faint">{hint}</span> : null}
         </span>
       </div>
-      <div className="nb-track">
-        <div
-          className="h-full rounded-full"
-          style={{ width: `${width}%`, background: fill }}
-        />
-      </div>
+      <AnimatedBar value={width} color={fill} />
     </div>
   );
 }

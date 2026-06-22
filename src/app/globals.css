@@ -91,7 +91,7 @@ body {
     @apply rounded-lg border border-line bg-surface;
   }
   .nb-press {
-    @apply transition-colors duration-150 hover:border-line-strong;
+    @apply transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[0_10px_30px_-16px_rgba(26,26,29,0.28)] active:translate-y-0;
   }
 
   /* Chips & labels */
@@ -104,10 +104,14 @@ body {
 
   /* Buttons */
   .nb-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-accent-ink;
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_-12px_rgba(223,56,42,0.7)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-accent-ink hover:shadow-[0_12px_26px_-12px_rgba(223,56,42,0.8)] active:translate-y-0;
   }
   .nb-btn-bw {
-    @apply inline-flex items-center justify-center gap-2 rounded-md border border-line-strong bg-surface px-5 py-2.5 text-sm font-semibold text-ink transition-colors duration-150 hover:border-ink;
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-line-strong bg-surface px-5 py-2.5 text-sm font-semibold text-ink transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-ink hover:shadow-[0_10px_24px_-16px_rgba(26,26,29,0.4)] active:translate-y-0;
+  }
+  /* Group hover arrow nudge */
+  .nb-arrow {
+    @apply transition-transform duration-200 ease-out group-hover:translate-x-0.5;
   }
 
   /* Thin baseline meter (no boxed track) */

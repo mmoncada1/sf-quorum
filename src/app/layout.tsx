@@ -4,6 +4,7 @@ import { Archivo, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
+import { LogoMark } from "@/components/logo";
 
 const sans = Archivo({
   subsets: ["latin"],
@@ -40,9 +41,7 @@ export default function RootLayout({
         <footer className="mt-24 border-t border-line">
           <div className="mx-auto max-w-6xl px-4 py-12 text-sm text-muted">
             <div className="flex items-center gap-2.5">
-              <span className="flex h-7 w-7 items-center justify-center rounded bg-ink font-mono text-[11px] font-bold text-paper">
-                SF
-              </span>
+              <LogoMark size={28} />
               <span className="font-semibold tracking-tight text-ink">
                 Quorum
               </span>

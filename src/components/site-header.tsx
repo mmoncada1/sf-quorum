@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { LogoMark } from "@/components/logo";
 
 const NAV = [
   { href: "/leaderboard", label: "Leaderboard" },
@@ -29,12 +30,13 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3.5">
         <Link
           href="/"
-          className="flex items-center gap-2.5"
+          className="group flex items-center gap-2.5"
           onClick={() => setOpen(false)}
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded bg-ink font-mono text-xs font-bold text-paper">
-            SF
-          </span>
+          <LogoMark
+            size={32}
+            className="transition-transform duration-200 ease-out group-hover:-rotate-3"
+          />
           <span className="font-display text-lg font-bold tracking-tight text-ink">
             Quorum
           </span>
