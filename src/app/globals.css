@@ -2,40 +2,81 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Neobrutalism theme tokens */
 :root {
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-display: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --bg: #f4f0e6;
+  --bw: #ffffff;
+  --blank: #000000;
+  --border: #000000;
+  --text: #000000;
+  --mtext: #000000;
+  --ring: #000000;
+  --ring-offset: #ffffff;
+
+  --main: #ff5a36;
+  --main-accent: #e63e1c;
+  --overlay: rgba(0, 0, 0, 0.8);
+
+  --win: #34d97b;
+  --loss: #ff5d52;
+  --gold: #ffd23f;
+  --info: #4d9de0;
+  --grape: #b388ff;
+
+  --box-shadow-x: 4px;
+  --box-shadow-y: 4px;
+  --shadow: var(--box-shadow-x) var(--box-shadow-y) 0px 0px var(--border);
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
-  background:
-    radial-gradient(1200px 600px at 80% -10%, rgba(255, 90, 54, 0.10), transparent 60%),
-    radial-gradient(900px 500px at -10% 10%, rgba(91, 141, 239, 0.10), transparent 55%),
-    #0a0a0b;
-  color: #ececf1;
+  background-color: var(--bg);
+  background-image: radial-gradient(rgba(0, 0, 0, 0.13) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+  color: var(--text);
+  font-weight: 500;
   -webkit-font-smoothing: antialiased;
 }
 
-@layer components {
-  .card {
-    @apply rounded-2xl border border-ink-line bg-ink-card shadow-card;
-  }
-  .chip {
-    @apply inline-flex items-center gap-1 rounded-full border border-ink-line px-2.5 py-0.5 text-xs font-medium text-zinc-300;
-  }
-  .stat-track {
-    @apply h-2 w-full overflow-hidden rounded-full bg-white/5;
-  }
-  .link-muted {
-    @apply text-zinc-400 transition-colors hover:text-white;
+@layer base {
+  h1, h2, h3 {
+    @apply font-heading;
   }
 }
 
-/* subtle scrollbar */
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: #2a2a33; border-radius: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
+@layer components {
+  .nb-card {
+    @apply rounded-base border-2 border-border bg-bw shadow-shadow;
+  }
+  .nb-flat {
+    @apply rounded-base border-2 border-border bg-bw;
+  }
+  .nb-press {
+    @apply transition-all duration-150 hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none;
+  }
+  .nb-chip {
+    @apply inline-flex items-center gap-1 rounded-base border-2 border-border bg-bw px-2.5 py-0.5 text-xs font-bold text-text;
+  }
+  .nb-btn {
+    @apply inline-flex items-center justify-center rounded-base border-2 border-border bg-main px-5 py-2.5 text-sm font-heading text-text shadow-shadow transition-all duration-150 hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none;
+  }
+  .nb-btn-bw {
+    @apply inline-flex items-center justify-center rounded-base border-2 border-border bg-bw px-5 py-2.5 text-sm font-heading text-text shadow-shadow transition-all duration-150 hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none;
+  }
+  .nb-track {
+    @apply h-3 w-full overflow-hidden rounded-base border-2 border-border bg-bw;
+  }
+  .kicker {
+    @apply inline-block rounded-base border-2 border-border bg-main px-2 py-0.5 text-[11px] font-heading uppercase tracking-wide text-text;
+  }
+}
+
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-thumb { background: #000; border: 2px solid var(--bg); }
+::-webkit-scrollbar-track { background: var(--bg); }

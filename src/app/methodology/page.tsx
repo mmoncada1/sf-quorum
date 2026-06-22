@@ -4,10 +4,13 @@ export const metadata = {
 
 export default function MethodologyPage() {
   return (
-    <div className="prose-invert max-w-3xl space-y-8">
-      <header>
-        <h1 className="font-display text-3xl font-black text-white">Methodology</h1>
-        <p className="mt-2 text-zinc-400">
+    <div className="max-w-3xl space-y-8">
+      <header className="nb-card p-6">
+        <div className="kicker mb-3">Receipts</div>
+        <h1 className="font-display text-4xl font-heading uppercase tracking-tight text-black">
+          Methodology
+        </h1>
+        <p className="mt-3 font-medium text-black/80">
           SF Quorum is built to be boringly transparent. Every number on this site
           is computed mechanically from San Francisco&apos;s own public records.
           No vibes, no editorializing in the data.
@@ -21,7 +24,7 @@ export default function MethodologyPage() {
           legislative portal at{" "}
           <a
             href="https://sfgov.legistar.com"
-            className="text-brand hover:underline"
+            className="font-bold text-main underline decoration-2 underline-offset-2"
             target="_blank"
             rel="noreferrer"
           >
@@ -53,25 +56,26 @@ export default function MethodologyPage() {
           everyone else is measured against them — so this is a true ranking of
           the current Board, not an absolute grade.
         </p>
-        <ul className="ml-5 list-disc space-y-2 text-zinc-300">
+        <ul className="ml-5 list-disc space-y-2 font-medium text-black/80">
           <li>
-            <strong className="text-win">Impact</strong> — rewards getting
+            <strong className="text-black">Impact</strong> — rewards getting
             substantive legislation actually passed into law. Honorary and purely
             symbolic resolutions are weighted near zero on purpose.
           </li>
           <li>
-            <strong className="text-blue-300">Activity</strong> — how much
-            original legislation the supervisor authors and co-sponsors.
+            <strong className="text-black">Activity</strong> — how much original
+            legislation the supervisor authors and co-sponsors.
           </li>
           <li>
-            <strong className="text-gold">Attendance</strong> — the share of
+            <strong className="text-black">Attendance</strong> — the share of
             roll-call votes where the supervisor was present and voting (vs.
             excused/absent).
           </li>
           <li>
-            <strong className="text-brand">Independence</strong> — how often the
-            supervisor breaks from the eventual majority. High independence isn&apos;t
-            inherently good or bad; it just measures willingness to dissent.
+            <strong className="text-black">Independence</strong> — how often the
+            supervisor breaks from the eventual majority. High independence
+            isn&apos;t inherently good or bad; it just measures willingness to
+            dissent.
           </li>
         </ul>
         <p className="mt-3">
@@ -91,7 +95,7 @@ export default function MethodologyPage() {
       </Section>
 
       <Section title="Limitations & honesty">
-        <ul className="ml-5 list-disc space-y-2 text-zinc-300">
+        <ul className="ml-5 list-disc space-y-2 font-medium text-black/80">
           <li>
             Scores reflect only the meetings ingested so far — a rolling recent
             window, not necessarily a supervisor&apos;s entire career.
@@ -123,9 +127,11 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="card p-6">
-      <h2 className="mb-2 font-display text-xl font-bold text-white">{title}</h2>
-      <div className="space-y-3 text-sm leading-relaxed text-zinc-400">
+    <section className="nb-card p-6">
+      <h2 className="mb-2 font-display text-xl font-heading uppercase tracking-tight text-black">
+        {title}
+      </h2>
+      <div className="space-y-3 text-sm font-medium leading-relaxed text-black/80">
         {children}
       </div>
     </section>

@@ -12,11 +12,12 @@ export default async function SupervisorsPage() {
 
   return (
     <div className="space-y-8">
-      <header className="max-w-3xl">
-        <h1 className="font-display text-3xl font-black text-white">
+      <header className="nb-card max-w-3xl p-6">
+        <div className="kicker mb-3">The roster</div>
+        <h1 className="font-display text-4xl font-heading uppercase tracking-tight text-black">
           The 11 District Supervisors
         </h1>
-        <p className="mt-2 text-zinc-400">
+        <p className="mt-3 font-medium text-black/80">
           San Francisco is governed by an 11-member Board, one supervisor per
           district. Click any card for a full dossier: voting record, focus
           areas, attendance, and authored legislation.
@@ -28,19 +29,17 @@ export default async function SupervisorsPage() {
           <Link
             key={s.id}
             href={`/supervisors/${s.slug}`}
-            className="card group p-5 transition hover:border-brand/40"
+            className="nb-card nb-press group p-5"
           >
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <Avatar name={s.fullName} district={s.district} size={52} />
                 <div>
-                  <div className="font-bold text-white group-hover:text-brand">
-                    {s.fullName}
-                  </div>
-                  <div className="text-xs text-zinc-500">
+                  <div className="font-heading text-black">{s.fullName}</div>
+                  <div className="text-xs font-bold text-black/60">
                     District {s.district}
                   </div>
-                  <div className="text-xs text-zinc-500">{s.title}</div>
+                  <div className="text-xs font-bold text-black/60">{s.title}</div>
                 </div>
               </div>
               <GradeBadge grade={s.stats?.grade} />
@@ -48,26 +47,22 @@ export default async function SupervisorsPage() {
 
             <div className="mt-4 flex items-end justify-between">
               <div>
-                <div className="text-[11px] uppercase tracking-wide text-zinc-500">
+                <div className="text-[11px] font-bold uppercase tracking-wide text-black/60">
                   Overall score
                 </div>
                 {s.stats ? (
                   <ScoreNumber score={s.stats.overallScore} />
                 ) : (
-                  <span className="text-zinc-600">—</span>
+                  <span className="text-black/40">—</span>
                 )}
               </div>
-              <div className="text-right text-xs text-zinc-500">
+              <div className="text-right text-xs font-bold text-black/70">
                 <div>
-                  <span className="font-semibold text-zinc-300">
-                    {s.stats?.sponsored ?? 0}
-                  </span>{" "}
+                  <span className="text-black">{s.stats?.sponsored ?? 0}</span>{" "}
                   authored
                 </div>
                 <div>
-                  <span className="font-semibold text-zinc-300">
-                    {s.stats?.totalVotes ?? 0}
-                  </span>{" "}
+                  <span className="text-black">{s.stats?.totalVotes ?? 0}</span>{" "}
                   votes
                 </div>
               </div>

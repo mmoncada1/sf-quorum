@@ -6,10 +6,9 @@ import {
   SectionTitle,
   TopicChip,
   TypePill,
-  VotePill,
   VoteTallyBar,
 } from "@/components/ui";
-import { fmtDate, voteColor } from "@/lib/format";
+import { fmtDate, voteBg } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -36,32 +35,37 @@ export default async function MatterPage({
 
   return (
     <div className="space-y-8">
-      <Link href="/legislation" className="text-sm link-muted">
+      <Link
+        href="/legislation"
+        className="inline-block font-bold text-black underline decoration-2 underline-offset-2 hover:text-main"
+      >
         ← Back to legislation
       </Link>
 
       {/* Header */}
-      <section className="card p-6 sm:p-8">
+      <section className="nb-card p-6 sm:p-8">
         <div className="flex flex-wrap items-center gap-2">
           <TypePill type={m.type} />
           {m.file ? (
-            <span className="font-mono text-sm text-zinc-500">#{m.file}</span>
+            <span className="font-mono text-sm font-bold text-black/50">
+              #{m.file}
+            </span>
           ) : null}
           {m.status ? (
-            <span className="rounded-md bg-white/5 px-2 py-0.5 text-xs text-zinc-300">
+            <span className="rounded-base border-2 border-border bg-bg px-2 py-0.5 text-xs font-bold text-black">
               {m.status}
             </span>
           ) : null}
         </div>
 
         {m.summary ? (
-          <div className="mt-4 rounded-xl border border-brand/20 bg-brand/5 p-4">
-            <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-brand">
+          <div className="mt-4 rounded-base border-2 border-border bg-main p-4 shadow-nbsm">
+            <div className="mb-1 text-[11px] font-heading uppercase tracking-wide text-black">
               In plain English
             </div>
-            <p className="text-lg font-semibold text-white">{m.summary}</p>
+            <p className="text-lg font-heading text-black">{m.summary}</p>
             {m.summarySource === "heuristic" ? (
-              <p className="mt-2 text-[11px] text-zinc-500">
+              <p className="mt-2 text-[11px] font-bold text-black/60">
                 Auto-generated from the official title. Add an LLM key for richer
                 summaries.
               </p>
@@ -69,7 +73,9 @@ export default async function MatterPage({
           </div>
         ) : null}
 
-        <h1 className="mt-4 text-base leading-relaxed text-zinc-300">{m.title}</h1>
+        <h1 className="mt-4 text-base font-medium leading-relaxed text-black/80">
+          {m.title}
+        </h1>
 
         <div className="mt-4 flex flex-wrap gap-2">
           {m.topics.map((t) => (
@@ -83,17 +89,17 @@ export default async function MatterPage({
           ))}
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-ink-line/60 pt-4 text-sm">
+        <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 border-t-2 border-border pt-4 text-sm">
           <Meta label="Introduced" value={fmtDate(m.introDate)} />
           <Meta label="Final action" value={fmtDate(m.finalDate)} />
           {sponsors.length > 0 ? (
-            <div className="text-sm">
-              <span className="text-zinc-500">Sponsors: </span>
+            <div className="text-sm font-bold">
+              <span className="text-black/50">Sponsors: </span>
               {sponsors.map((s, i) => (
                 <span key={s.supervisorId}>
                   <Link
                     href={`/supervisors/${s.supervisor.slug}`}
-                    className="text-zinc-200 hover:text-brand"
+                    className="text-black underline decoration-2 underline-offset-2 hover:text-main"
                   >
                     {s.supervisor.fullName}
                   </Link>
@@ -107,7 +113,7 @@ export default async function MatterPage({
               href={m.sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-brand hover:underline"
+              className="text-sm font-bold text-main underline decoration-2 underline-offset-2"
             >
               Official record ↗
             </a>
@@ -119,7 +125,7 @@ export default async function MatterPage({
       <section>
         <SectionTitle kicker="The roll call">How they voted</SectionTitle>
         {actionsWithVotes.length === 0 ? (
-          <div className="card p-6 text-sm text-zinc-400">
+          <div className="nb-card p-6 text-sm font-bold text-black/60">
             No recorded roll-call vote yet. This item may have passed without a
             recorded individual vote, or is still pending.
           </div>
@@ -135,23 +141,24 @@ export default async function MatterPage({
               const no = votes.filter((v) => v.value === "No").length;
               const other = votes.length - aye - no;
               return (
-                <div key={a.id} className="card p-5">
+                <div key={a.id} className="nb-card p-5">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <div className="font-semibold text-zinc-100">
+                      <div className="font-heading text-black">
                         {a.actionText || "Action"}
                       </div>
-                      <div className="text-xs text-zinc-500">
+                      <div className="text-xs font-bold text-black/60">
                         {a.bodyName} · {fmtDate(a.date)}
                         {a.result ? (
                           <span
-                            className={`ml-2 font-semibold ${
-                              /pass|adopt|approv/i.test(a.result)
-                                ? "text-win"
+                            className="ml-2 inline-block rounded-base border-2 border-border px-1.5 font-heading text-black"
+                            style={{
+                              background: /pass|adopt|approv/i.test(a.result)
+                                ? "var(--win)"
                                 : /fail|reject/i.test(a.result)
-                                  ? "text-loss"
-                                  : "text-zinc-400"
-                            }`}
+                                  ? "var(--loss)"
+                                  : "#fff",
+                            }}
                           >
                             {a.result}
                           </span>
@@ -166,7 +173,7 @@ export default async function MatterPage({
                       <Link
                         key={v.id}
                         href={`/supervisors/${v.supervisor.slug}`}
-                        className="flex items-center gap-2 rounded-lg border border-ink-line/60 bg-black/20 p-2 transition hover:border-brand/40"
+                        className="flex items-center gap-2 rounded-base border-2 border-border bg-bw p-2 transition-transform hover:-translate-y-0.5"
                       >
                         <Avatar
                           name={v.supervisor.fullName}
@@ -174,14 +181,18 @@ export default async function MatterPage({
                           size={30}
                         />
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-xs font-medium text-zinc-200">
+                          <div className="truncate text-xs font-bold text-black">
                             {v.supervisor.fullName}
                           </div>
-                          <div className="text-[10px] text-zinc-500">
+                          <div className="text-[10px] font-bold text-black/50">
                             D{v.supervisor.district}
                           </div>
                         </div>
-                        <span className={`text-xs font-bold ${voteColor(v.value)}`}>
+                        <span
+                          className={`rounded-base border-2 border-border px-1.5 text-xs font-heading ${voteBg(
+                            v.value,
+                          )}`}
+                        >
                           {v.value === "Aye"
                             ? "✓"
                             : v.value === "No"
@@ -202,18 +213,20 @@ export default async function MatterPage({
       {m.actions.length > 0 && (
         <section>
           <SectionTitle kicker="Paper trail">Full action history</SectionTitle>
-          <div className="card divide-y divide-ink-line/60">
+          <div className="nb-card divide-y-2 divide-border">
             {m.actions.map((a) => (
               <div key={a.id} className="flex items-start gap-3 p-3 text-sm">
-                <span className="w-24 shrink-0 text-xs text-zinc-500">
+                <span className="w-24 shrink-0 text-xs font-bold text-black/50">
                   {fmtDate(a.date)}
                 </span>
-                <span className="flex-1 text-zinc-300">
-                  <span className="text-zinc-500">{a.bodyName}: </span>
+                <span className="flex-1 font-medium text-black/80">
+                  <span className="font-bold text-black/50">{a.bodyName}: </span>
                   {a.actionText || "—"}
                 </span>
                 {a.result ? (
-                  <span className="shrink-0 text-xs text-zinc-400">{a.result}</span>
+                  <span className="shrink-0 text-xs font-bold text-black/70">
+                    {a.result}
+                  </span>
                 ) : null}
               </div>
             ))}
@@ -226,9 +239,9 @@ export default async function MatterPage({
 
 function Meta({ label, value }: { label: string; value: string }) {
   return (
-    <div className="text-sm">
-      <span className="text-zinc-500">{label}: </span>
-      <span className="text-zinc-200">{value}</span>
+    <div className="text-sm font-bold">
+      <span className="text-black/50">{label}: </span>
+      <span className="text-black">{value}</span>
     </div>
   );
 }

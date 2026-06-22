@@ -18,38 +18,31 @@ export function pct(n: number): string {
   return `${Math.round(n * 100)}%`;
 }
 
-/** Color for a vote value. */
-export function voteColor(value: string): string {
-  const v = value.toLowerCase();
-  if (v === "aye") return "text-win";
-  if (v === "no") return "text-loss";
-  if (v === "excused" || v === "absent") return "text-meh";
-  return "text-zinc-300";
-}
-
+/** Solid neo-brutalist block for a vote value. */
 export function voteBg(value: string): string {
   const v = value.toLowerCase();
-  if (v === "aye") return "bg-win/15 text-win border-win/30";
-  if (v === "no") return "bg-loss/15 text-loss border-loss/30";
-  if (v === "excused" || v === "absent") return "bg-white/5 text-meh border-white/10";
-  return "bg-white/5 text-zinc-300 border-white/10";
+  if (v === "aye") return "bg-win text-black";
+  if (v === "no") return "bg-loss text-black";
+  if (v === "excused" || v === "absent") return "bg-zinc-200 text-black";
+  return "bg-bw text-black";
 }
 
-/** Color for a letter grade. */
-export function gradeColor(grade: string | null | undefined): string {
-  if (!grade) return "text-meh";
-  if (grade.startsWith("A")) return "text-win";
-  if (grade.startsWith("B")) return "text-emerald-300";
-  if (grade.startsWith("C")) return "text-gold";
-  if (grade.startsWith("D")) return "text-orange-400";
-  return "text-loss";
+/** Solid background block for a letter grade. */
+export function gradeBg(grade: string | null | undefined): string {
+  if (!grade) return "bg-zinc-200 text-black";
+  if (grade.startsWith("A")) return "bg-win text-black";
+  if (grade.startsWith("B")) return "bg-info text-black";
+  if (grade.startsWith("C")) return "bg-gold text-black";
+  if (grade.startsWith("D")) return "bg-main text-black";
+  return "bg-loss text-black";
 }
 
-export function scoreColor(score: number): string {
-  if (score >= 74) return "text-win";
-  if (score >= 50) return "text-gold";
-  if (score >= 34) return "text-orange-400";
-  return "text-loss";
+/** Hex used for solid stat-bar fills. */
+export function scoreFill(score: number): string {
+  if (score >= 74) return "var(--win)";
+  if (score >= 50) return "var(--gold)";
+  if (score >= 34) return "var(--main)";
+  return "var(--loss)";
 }
 
 export function ordinal(n: number): string {
@@ -65,4 +58,24 @@ export function initials(name: string): string {
     .slice(0, 2)
     .map((p) => p[0]?.toUpperCase())
     .join("");
+}
+
+/** Deterministic bright block color for avatars/blocks. */
+const BLOCK_COLORS = [
+  "#ff5a36",
+  "#34d97b",
+  "#ffd23f",
+  "#4d9de0",
+  "#b388ff",
+  "#ff5d52",
+  "#ff9f1c",
+  "#2ec4b6",
+];
+
+export function blockColor(seed: number | string): string {
+  const n =
+    typeof seed === "number"
+      ? seed
+      : seed.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  return BLOCK_COLORS[Math.abs(n) % BLOCK_COLORS.length];
 }

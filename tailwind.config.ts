@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 
+// Neobrutalism design tokens (neobrutalism.dev convention, Tailwind v3 setup).
 const config: Config = {
   content: [
     "./src/app/**/*.{ts,tsx}",
@@ -8,28 +9,47 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: {
-          DEFAULT: "#0a0a0b",
-          soft: "#141417",
-          card: "#17171c",
-          line: "#26262e",
-        },
-        brand: {
-          DEFAULT: "#ff5a36",
-          dim: "#c7421f",
-        },
-        gold: "#ffce4d",
-        win: "#2fd17a",
-        loss: "#ff5d6c",
-        meh: "#8a8a99",
+        main: "var(--main)",
+        mainAccent: "var(--main-accent)",
+        overlay: "var(--overlay)",
+        bg: "var(--bg)",
+        bw: "var(--bw)",
+        blank: "var(--blank)",
+        text: "var(--text)",
+        mtext: "var(--mtext)",
+        border: "var(--border)",
+        ring: "var(--ring)",
+        ringOffset: "var(--ring-offset)",
+        secondaryBlack: "#212121",
+        // Bright category blocks
+        win: "var(--win)",
+        loss: "var(--loss)",
+        gold: "var(--gold)",
+        info: "var(--info)",
+        grape: "var(--grape)",
+      },
+      borderRadius: {
+        base: "6px",
+      },
+      boxShadow: {
+        shadow: "var(--shadow)",
+        nbsm: "2px 2px 0px 0px var(--border)",
+        nblg: "8px 8px 0px 0px var(--border)",
+      },
+      translate: {
+        boxShadowX: "4px",
+        boxShadowY: "4px",
+        reverseBoxShadowX: "-4px",
+        reverseBoxShadowY: "-4px",
+      },
+      fontWeight: {
+        base: "500",
+        heading: "800",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         display: ["var(--font-display)", "system-ui", "sans-serif"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
-      },
-      boxShadow: {
-        card: "0 1px 0 0 rgba(255,255,255,0.03) inset, 0 8px 24px -12px rgba(0,0,0,0.6)",
       },
     },
   },

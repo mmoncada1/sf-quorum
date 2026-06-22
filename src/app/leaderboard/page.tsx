@@ -10,11 +10,12 @@ export default async function LeaderboardPage() {
 
   return (
     <div className="space-y-8">
-      <header className="max-w-3xl">
-        <h1 className="font-display text-3xl font-black text-white">
+      <header className="nb-card max-w-3xl p-6">
+        <div className="kicker mb-3">The standings</div>
+        <h1 className="font-display text-4xl font-heading uppercase tracking-tight text-black">
           The Leaderboard
         </h1>
-        <p className="mt-2 text-zinc-400">
+        <p className="mt-3 font-medium text-black/80">
           Eleven supervisors. One scoreboard. Every member of the Board is graded
           on what they actually produce — substantive legislation passed, bills
           authored, attendance at the dais, and willingness to break from the
@@ -24,30 +25,30 @@ export default async function LeaderboardPage() {
       </header>
 
       {leaders.length === 0 ? (
-        <div className="card p-8 text-center text-sm text-zinc-400">
-          No stats computed yet. Run <code className="text-brand">npm run refresh</code>.
+        <div className="nb-card p-8 text-center font-bold text-black/70">
+          No stats computed yet. Run <code className="text-main">npm run refresh</code>.
         </div>
       ) : (
-        <ol className="space-y-3">
+        <ol className="space-y-4">
           {leaders.map((s) => {
             const st = s.stats!;
             return (
               <li key={s.id}>
                 <Link
                   href={`/supervisors/${s.slug}`}
-                  className="card group flex flex-col gap-5 p-5 transition hover:border-brand/40 lg:flex-row lg:items-center"
+                  className="nb-card nb-press group flex flex-col gap-5 p-5 lg:flex-row lg:items-center"
                 >
                   {/* Rank + identity */}
                   <div className="flex items-center gap-4 lg:w-72">
-                    <div className="w-8 shrink-0 text-center font-display text-2xl font-black text-zinc-600">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-base border-2 border-border bg-bg font-display text-xl font-heading text-black">
                       {st.rank}
                     </div>
                     <Avatar name={s.fullName} district={s.district} size={52} />
                     <div className="min-w-0">
-                      <div className="truncate font-bold text-white group-hover:text-brand">
+                      <div className="truncate font-heading text-black">
                         {s.fullName}
                       </div>
-                      <div className="text-xs text-zinc-500">
+                      <div className="text-xs font-bold text-black/60">
                         District {s.district} · {s.title}
                       </div>
                       <div className="mt-1.5 flex flex-wrap gap-1">
@@ -61,7 +62,7 @@ export default async function LeaderboardPage() {
                   {/* Score + grade */}
                   <div className="flex items-center gap-4 lg:w-40">
                     <div>
-                      <div className="text-[11px] uppercase tracking-wide text-zinc-500">
+                      <div className="text-[11px] font-bold uppercase tracking-wide text-black/60">
                         Overall
                       </div>
                       <ScoreNumber score={st.overallScore} />
@@ -70,15 +71,15 @@ export default async function LeaderboardPage() {
                   </div>
 
                   {/* Stat bars */}
-                  <div className="grid flex-1 grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4">
-                    <StatBar label="Impact" value={st.impactScore} accent="#2fd17a" />
-                    <StatBar label="Activity" value={st.activityScore} accent="#5b8def" />
-                    <StatBar label="Attendance" value={st.attendanceRate * 100} accent="#ffce4d" />
-                    <StatBar label="Independence" value={st.independence} accent="#ff5a36" />
+                  <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-3">
+                    <StatBar label="Impact" value={st.impactScore} accent="var(--win)" />
+                    <StatBar label="Activity" value={st.activityScore} accent="var(--info)" />
+                    <StatBar label="Attendance" value={st.attendanceRate * 100} accent="var(--gold)" />
+                    <StatBar label="Independence" value={st.independence} accent="var(--main)" />
                   </div>
 
                   {/* Counts */}
-                  <div className="flex shrink-0 gap-5 border-t border-ink-line/60 pt-3 text-center lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+                  <div className="flex shrink-0 gap-5 border-t-2 border-border pt-3 text-center lg:border-l-2 lg:border-t-0 lg:pl-5 lg:pt-0">
                     <Count label="Votes" value={st.totalVotes} />
                     <Count label="Authored" value={st.sponsored} />
                     <Count label="Passed" value={st.passedSponsored} />
@@ -97,10 +98,12 @@ export default async function LeaderboardPage() {
 function Count({ label, value }: { label: string; value: number | string }) {
   return (
     <div>
-      <div className="font-display text-lg font-bold tabular-nums text-white">
+      <div className="font-display text-lg font-heading tabular-nums text-black">
         {value}
       </div>
-      <div className="text-[10px] uppercase tracking-wide text-zinc-500">{label}</div>
+      <div className="text-[10px] font-bold uppercase tracking-wide text-black/60">
+        {label}
+      </div>
     </div>
   );
 }

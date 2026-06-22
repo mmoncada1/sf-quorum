@@ -16,9 +16,12 @@ export default async function LegislationPage({
 
   return (
     <div className="space-y-6">
-      <header className="max-w-3xl">
-        <h1 className="font-display text-3xl font-black text-white">Legislation</h1>
-        <p className="mt-2 text-zinc-400">
+      <header className="nb-card max-w-3xl p-6">
+        <div className="kicker mb-3">The feed</div>
+        <h1 className="font-display text-4xl font-heading uppercase tracking-tight text-black">
+          Legislation
+        </h1>
+        <p className="mt-3 font-medium text-black/80">
           Everything moving through the Board and its committees, newest first,
           each translated into plain English. Filter by policy area.
         </p>
@@ -27,7 +30,8 @@ export default async function LegislationPage({
       <div className="flex flex-wrap gap-2">
         <Link
           href="/legislation"
-          className={`chip ${!topic ? "border-brand/50 text-brand" : ""}`}
+          className="rounded-base border-2 border-border px-3 py-1 text-xs font-bold text-black shadow-nbsm"
+          style={!topic ? { background: "var(--main)" } : { background: "#fff" }}
         >
           All
         </Link>
@@ -35,12 +39,8 @@ export default async function LegislationPage({
           <Link
             key={t.slug}
             href={`/legislation?topic=${t.slug}`}
-            className="chip"
-            style={
-              topic === t.slug
-                ? { borderColor: `${t.color}`, color: t.color }
-                : undefined
-            }
+            className="rounded-base border-2 border-border px-3 py-1 text-xs font-bold text-black shadow-nbsm"
+            style={{ background: topic === t.slug ? t.color : "#fff" }}
           >
             {t.emoji} {t.name}
           </Link>
@@ -48,9 +48,9 @@ export default async function LegislationPage({
       </div>
 
       {activeTopic ? (
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm font-bold text-black/70">
           Showing{" "}
-          <span className="text-zinc-300">
+          <span className="text-black">
             {activeTopic.emoji} {activeTopic.name}
           </span>{" "}
           legislation ({matters.length}).
@@ -58,7 +58,7 @@ export default async function LegislationPage({
       ) : null}
 
       {matters.length === 0 ? (
-        <div className="card p-8 text-center text-sm text-zinc-400">
+        <div className="nb-card p-8 text-center font-bold text-black/70">
           Nothing here yet.
         </div>
       ) : (

@@ -55,34 +55,37 @@ export default async function SupervisorPage({
 
   return (
     <div className="space-y-10">
-      <Link href="/leaderboard" className="text-sm link-muted">
+      <Link
+        href="/leaderboard"
+        className="inline-block font-bold text-black underline decoration-2 underline-offset-2 hover:text-main"
+      >
         ← Back to leaderboard
       </Link>
 
       {/* Hero */}
-      <section className="card overflow-hidden">
+      <section className="nb-card overflow-hidden">
         <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8">
           <Avatar name={sup.fullName} district={sup.district} size={96} />
           <div className="flex-1">
-            <div className="flex items-center gap-2 text-sm text-zinc-400">
-              <span className="rounded-md bg-white/5 px-2 py-0.5 font-semibold text-zinc-200">
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="rounded-base border-2 border-border bg-main px-2 py-0.5 font-heading text-black">
                 District {sup.district}
               </span>
-              <span>{sup.title}</span>
+              <span className="font-bold text-black/70">{sup.title}</span>
               {st?.rank ? (
-                <span className="text-zinc-500">
+                <span className="font-bold text-black/50">
                   · {ordinal(st.rank)} overall
                 </span>
               ) : null}
             </div>
-            <h1 className="mt-1 font-display text-3xl font-black text-white">
+            <h1 className="mt-2 font-display text-4xl font-heading uppercase tracking-tight text-black">
               {sup.fullName}
             </h1>
-            <p className="mt-2 max-w-2xl text-sm text-zinc-400">{report}</p>
+            <p className="mt-2 max-w-2xl font-medium text-black/80">{report}</p>
             {sup.email ? (
               <a
                 href={`mailto:${sup.email}`}
-                className="mt-2 inline-block text-xs text-brand hover:underline"
+                className="mt-2 inline-block text-xs font-bold text-main underline decoration-2 underline-offset-2"
               >
                 {sup.email}
               </a>
@@ -91,7 +94,7 @@ export default async function SupervisorPage({
           {st ? (
             <div className="flex items-center gap-5 sm:flex-col sm:items-end">
               <div className="text-right">
-                <div className="text-[11px] uppercase tracking-wide text-zinc-500">
+                <div className="text-[11px] font-bold uppercase tracking-wide text-black/60">
                   Overall
                 </div>
                 <ScoreNumber score={st.overallScore} />
@@ -102,11 +105,11 @@ export default async function SupervisorPage({
         </div>
 
         {st ? (
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4 border-t border-ink-line/60 p-6 sm:grid-cols-4">
-            <StatBar label="Impact" value={st.impactScore} accent="#2fd17a" />
-            <StatBar label="Activity" value={st.activityScore} accent="#5b8def" />
-            <StatBar label="Attendance" value={st.attendanceRate * 100} accent="#ffce4d" />
-            <StatBar label="Independence" value={st.independence} accent="#ff5a36" />
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4 border-t-2 border-border bg-bg p-6 sm:grid-cols-4">
+            <StatBar label="Impact" value={st.impactScore} accent="var(--win)" />
+            <StatBar label="Activity" value={st.activityScore} accent="var(--info)" />
+            <StatBar label="Attendance" value={st.attendanceRate * 100} accent="var(--gold)" />
+            <StatBar label="Independence" value={st.independence} accent="var(--main)" />
           </div>
         ) : null}
       </section>
@@ -115,11 +118,11 @@ export default async function SupervisorPage({
       {st ? (
         <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <Tile label="Votes cast" value={st.totalVotes} />
-          <Tile label="Aye" value={st.ayes} tone="text-win" />
-          <Tile label="No" value={st.noes} tone="text-loss" />
-          <Tile label="Absent / excused" value={st.absences} tone="text-meh" />
-          <Tile label="Authored" value={st.sponsored} />
-          <Tile label="Passed into law" value={st.passedSponsored} tone="text-win" />
+          <Tile label="Aye" value={st.ayes} color="bg-win" />
+          <Tile label="No" value={st.noes} color="bg-loss" />
+          <Tile label="Absent / excused" value={st.absences} color="bg-zinc-200" />
+          <Tile label="Authored" value={st.sponsored} color="bg-info" />
+          <Tile label="Passed into law" value={st.passedSponsored} color="bg-gold" />
         </section>
       ) : null}
 
@@ -127,24 +130,24 @@ export default async function SupervisorPage({
       {topTopics.length > 0 && (
         <section>
           <SectionTitle kicker="Where the time goes">Focus areas</SectionTitle>
-          <div className="card space-y-3 p-5">
+          <div className="nb-card space-y-3 p-5">
             {topTopics.map((t) => {
               const def = TOPIC_BY_SLUG[t.slug];
               return (
                 <div key={t.slug} className="flex items-center gap-3">
-                  <div className="w-40 shrink-0 text-sm text-zinc-300">
+                  <div className="w-40 shrink-0 text-sm font-bold text-black">
                     {t.emoji} {t.name}
                   </div>
-                  <div className="stat-track flex-1">
+                  <div className="h-4 flex-1 overflow-hidden rounded-base border-2 border-border bg-bw">
                     <div
-                      className="h-full rounded-full"
+                      className="h-full"
                       style={{
                         width: `${(t.count / maxTopic) * 100}%`,
-                        background: def?.color || "#ff5a36",
+                        background: def?.color || "var(--main)",
                       }}
                     />
                   </div>
-                  <div className="w-8 text-right text-sm tabular-nums text-zinc-400">
+                  <div className="w-8 text-right text-sm font-heading tabular-nums text-black">
                     {t.count}
                   </div>
                 </div>
@@ -159,7 +162,7 @@ export default async function SupervisorPage({
         <section>
           <SectionTitle kicker="The output">Authored legislation</SectionTitle>
           {sponsored.length === 0 ? (
-            <div className="card p-5 text-sm text-zinc-500">
+            <div className="nb-card p-5 text-sm font-bold text-black/60">
               No authored legislation in the ingested window.
             </div>
           ) : (
@@ -168,17 +171,17 @@ export default async function SupervisorPage({
                 <li key={s.matterId}>
                   <Link
                     href={`/legislation/${s.matter.legistarId}`}
-                    className="card group block p-3 transition hover:border-brand/40"
+                    className="nb-card nb-press group block p-3"
                   >
                     <div className="flex items-center gap-2">
                       <TypePill type={s.matter.type} />
                       {s.matter.file ? (
-                        <span className="font-mono text-xs text-zinc-500">
+                        <span className="font-mono text-xs font-bold text-black/50">
                           #{s.matter.file}
                         </span>
                       ) : null}
                     </div>
-                    <p className="mt-1 line-clamp-2 text-sm text-zinc-200 group-hover:text-white">
+                    <p className="mt-1 line-clamp-2 text-sm font-bold text-black">
                       {s.matter.summary || s.matter.title}
                     </p>
                   </Link>
@@ -192,7 +195,7 @@ export default async function SupervisorPage({
         <section>
           <SectionTitle kicker="The record">Recent votes</SectionTitle>
           {votes.length === 0 ? (
-            <div className="card p-5 text-sm text-zinc-500">
+            <div className="nb-card p-5 text-sm font-bold text-black/60">
               No recorded votes in the ingested window.
             </div>
           ) : (
@@ -201,14 +204,14 @@ export default async function SupervisorPage({
                 <li key={v.id}>
                   <Link
                     href={`/legislation/${v.matter.legistarId}`}
-                    className="card group flex items-center gap-3 p-3 transition hover:border-brand/40"
+                    className="nb-card nb-press group flex items-center gap-3 p-3"
                   >
                     <VotePill value={v.value} />
                     <div className="min-w-0 flex-1">
-                      <p className="line-clamp-1 text-sm text-zinc-200 group-hover:text-white">
+                      <p className="line-clamp-1 text-sm font-bold text-black">
                         {v.matter.title}
                       </p>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs font-bold text-black/50">
                         {v.action.bodyName} · {fmtDate(v.action.date)}
                       </p>
                     </div>
@@ -226,18 +229,18 @@ export default async function SupervisorPage({
 function Tile({
   label,
   value,
-  tone = "text-white",
+  color = "bg-bw",
 }: {
   label: string;
   value: number;
-  tone?: string;
+  color?: string;
 }) {
   return (
-    <div className="card p-4">
-      <div className={`font-display text-2xl font-black tabular-nums ${tone}`}>
+    <div className={`rounded-base border-2 border-border p-4 shadow-nbsm ${color}`}>
+      <div className="font-display text-2xl font-heading tabular-nums text-black">
         {value}
       </div>
-      <div className="mt-0.5 text-xs text-zinc-500">{label}</div>
+      <div className="mt-0.5 text-xs font-bold uppercase text-black/70">{label}</div>
     </div>
   );
 }
