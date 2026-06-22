@@ -7,6 +7,7 @@ import {
   ScoreNumber,
   SectionTitle,
   StatBar,
+  StatusPill,
   TopicChip,
   TypePill,
   VotePill,
@@ -48,7 +49,13 @@ export default async function SupervisorPage({
   const { sup, topTopics, sponsorships, votes } = data;
   const st = sup.stats;
 
-  const sponsored = sponsorships.filter((s) => s.role === "sponsor");
+  const sponsored = sponsorships
+    .filter((s) => s.role === "sponsor")
+    .sort((a, b) => {
+      const da = (a.matter.finalDate ?? a.matter.introDate)?.getTime() ?? 0;
+      const db = (b.matter.finalDate ?? b.matter.introDate)?.getTime() ?? 0;
+      return db - da;
+    });
   const maxTopic = Math.max(1, ...topTopics.map((t) => t.count));
   const report = scoutingReport(sup.fullName, st, topTopics[0]?.name);
 
@@ -169,6 +176,12 @@ export default async function SupervisorPage({
                       {s.matter.file ? (
                         <span className="font-mono text-xs text-faint">
                           #{s.matter.file}
+                        </span>
+                      ) : null}
+                      <StatusPill status={s.matter.status} />
+                      {s.matter.finalDate || s.matter.introDate ? (
+                        <span className="ml-auto font-mono text-[11px] text-faint">
+                          {fmtDate(s.matter.finalDate ?? s.matter.introDate)}
                         </span>
                       ) : null}
                     </div>

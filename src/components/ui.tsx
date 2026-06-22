@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { blockColor, gradeBg, initials, scoreFill, voteBg } from "@/lib/format";
+import { blockColor, gradeBg, initials, scoreFill, statusTone, voteBg } from "@/lib/format";
 
 export function Avatar({
   name,
@@ -174,6 +174,19 @@ export function SectionTitle({
       </div>
       {action}
     </div>
+  );
+}
+
+export function StatusPill({ status }: { status: string | null | undefined }) {
+  if (!status) return null;
+  return (
+    <span
+      className={`inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide ${statusTone(
+        status,
+      )}`}
+    >
+      {status}
+    </span>
   );
 }
 

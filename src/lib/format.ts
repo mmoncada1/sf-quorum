@@ -37,6 +37,15 @@ export function gradeBg(grade: string | null | undefined): string {
   return "bg-nayWash text-nay";
 }
 
+/** Tinted wash + dark text for a matter's lifecycle status. */
+export function statusTone(status: string | null | undefined): string {
+  if (!status) return "bg-neutralWash text-muted";
+  const s = status.toLowerCase();
+  if (/pass|adopt|approv|enact|sign|finally/.test(s)) return "bg-yeaWash text-yea";
+  if (/fail|reject|veto|withdraw|tabl|died|killed/.test(s)) return "bg-nayWash text-nay";
+  return "bg-neutralWash text-muted";
+}
+
 /** Ink color expressing performance, used for the metric numerals. */
 export function scoreInk(score: number): string {
   if (score >= 67) return "text-yea";
