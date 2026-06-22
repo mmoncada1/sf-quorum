@@ -3,24 +3,19 @@ import Image from "next/image";
 import {
   ArrowRight,
   ArrowUpRight,
-  Bank,
-  ClockCounterClockwise,
-  Gavel,
-  Scroll,
   Trophy,
 } from "@phosphor-icons/react/dist/ssr";
-import { getLeaderboard, getOverview, getRecentMatters } from "@/lib/queries";
+import { getLeaderboard, getRecentMatters } from "@/lib/queries";
 import { MatterCard } from "@/components/matter-card";
 import { Avatar, GradeBadge, ScoreNumber, SectionTitle, TopicChip } from "@/components/ui";
-import { CountUp, Reveal } from "@/components/motion";
-import { fmtAgo, ordinal } from "@/lib/format";
+import { Reveal } from "@/components/motion";
+import { ordinal } from "@/lib/format";
 import { TOPICS } from "@/lib/topics";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [overview, leaders, recent] = await Promise.all([
-    getOverview(),
+  const [leaders, recent] = await Promise.all([
     getLeaderboard(),
     getRecentMatters(12),
   ]);
@@ -67,36 +62,6 @@ export default async function HomePage() {
           </figure>
         </Reveal>
       </section>
-
-      {/* Stats */}
-      <Reveal>
-        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-4">
-          <Stat
-            icon={<Scroll weight="duotone" size={22} />}
-            label="Legislation tracked"
-            count={overview.matters}
-          />
-          <Stat
-            icon={<Gavel weight="duotone" size={22} />}
-            label="Votes recorded"
-            count={overview.votes}
-          />
-          <Stat
-            icon={<Bank weight="duotone" size={22} />}
-            label="Meetings ingested"
-            count={overview.meetings}
-          />
-          <Stat
-            icon={<ClockCounterClockwise weight="duotone" size={22} />}
-            label="Last updated"
-            value={
-              overview.lastIngest?.finishedAt
-                ? fmtAgo(overview.lastIngest.finishedAt)
-                : "n/a"
-            }
-          />
-        </dl>
-      </Reveal>
 
       {/* Standings */}
       {top3.length > 0 && (
@@ -203,34 +168,6 @@ function MoreLink({ href, children }: { href: string; children: React.ReactNode 
       {children}
       <ArrowUpRight weight="bold" className="nb-arrow" />
     </Link>
-  );
-}
-
-function Stat({
-  icon,
-  label,
-  value,
-  count,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value?: string;
-  count?: number;
-}) {
-  return (
-    <div className="group bg-surface p-5 transition-colors hover:bg-paper">
-      <div className="flex items-center justify-between gap-2">
-        <dt className="font-mono text-[11px] uppercase tracking-wider text-muted">
-          {label}
-        </dt>
-        <span className="text-faint transition-colors group-hover:text-accent">
-          {icon}
-        </span>
-      </div>
-      <dd className="mt-2 font-mono text-2xl font-bold tabular-nums text-ink">
-        {count !== undefined ? <CountUp value={count} /> : value}
-      </dd>
-    </div>
   );
 }
 
