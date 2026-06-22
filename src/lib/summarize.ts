@@ -64,8 +64,52 @@ function plainify(text: string): string {
   return tidy(out);
 }
 
+// Matches the boilerplate "extending the time within which <Body> may respond"
+// resolutions the Board passes in bulk (one per landmark/appeal). These are
+// routine procedural housekeeping, not substantive authored legislation.
+const RESPONSE_EXTENSION =
+  /extending by (\d+)\s+days the (?:prescribed )?time within which the (.+?) may (?:respond to|act on|consider)\b(.+)/i;
+
+/** True for routine procedural resolutions that shouldn't inflate a record. */
+export function isProcedural(title: string | null | undefined): boolean {
+  return RESPONSE_EXTENSION.test(title || "");
+}
+
+/**
+ * Some resolutions are near-identical boilerplate where the only distinguishing
+ * detail (a landmark, a property, a deadline) sits ~30 words into the title.
+ * Front-load that detail so a list of them doesn't read as duplicates.
+ */
+function specialCaseSummary(title: string): string | null {
+  // "Resolution extending by N days the prescribed time within which the
+  //  <Body> may respond to a landmark designation of <Subject>, located at <Addr>, ..."
+  const ext = title.match(RESPONSE_EXTENSION);
+  if (ext) {
+    const days = ext[1];
+    const body = ext[2].trim();
+    const rest = ext[3];
+    const subj = rest.match(
+      /(?:landmark designation|designation|appeal|application)?\s*(?:of|for|regarding)\s+(.+?)(?:,?\s*located at\s+(.+?))?(?:,\s*Assessor|;|\.|$)/i,
+    );
+    if (subj) {
+      const what = subj[1].replace(/\s+/g, " ").trim();
+      const addr = subj[2]?.replace(/\s+/g, " ").trim();
+      return tidy(
+        `Gives the ${body} ${days} more days to decide on ${what}${
+          addr ? ` (${addr})` : ""
+        }.`,
+      );
+    }
+    return tidy(`Gives the ${body} ${days} more days to weigh in.`);
+  }
+  return null;
+}
+
 /** Deterministic, dependency-free summary. Always works. */
 export function heuristicSummary(m: SummarizableMatter): string {
+  const special = specialCaseSummary(m.title || m.name || "");
+  if (special) return special;
+
   const lead = TYPE_LEAD[m.type] || "Legislation:";
   // The first clause (before the first semicolon) is almost always the gist.
   const core = (m.title || m.name || "").split(/;|\. /)[0];

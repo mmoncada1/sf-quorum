@@ -6,6 +6,7 @@
 import "dotenv/config";
 import { prisma } from "../src/lib/db";
 import { scoreCohort, type RawStats } from "../src/lib/scoring";
+import { isProcedural } from "../src/lib/summarize";
 
 function log(...args: unknown[]) {
   console.log(`[compute ${new Date().toISOString().slice(11, 19)}]`, ...args);
@@ -35,6 +36,7 @@ async function run() {
     include: {
       matter: {
         select: {
+          title: true,
           status: true,
           type: true,
           topics: { include: { topic: true } },
@@ -59,15 +61,23 @@ async function run() {
     }
 
     const mine = sponsorships.filter((sp) => sp.supervisorId === s.id);
-    const sponsored = mine.filter((sp) => sp.role === "sponsor").length;
+    const sponsoredItems = mine.filter((sp) => sp.role === "sponsor");
+    const sponsored = sponsoredItems.length;
     const cosponsored = mine.filter((sp) => sp.role === "cosponsor").length;
-    const passedSponsored = mine.filter(
-      (sp) => sp.role === "sponsor" && PASSED.test(sp.matter.status || ""),
+    const passedSponsored = sponsoredItems.filter((sp) =>
+      PASSED.test(sp.matter.status || ""),
     ).length;
-    const substantiveSponsored = mine.filter(
-      (sp) =>
-        sp.role === "sponsor" &&
-        !sp.matter.topics.some((mt) => mt.topic.slug === "honorary"),
+    const isHonorary = (sp: (typeof sponsoredItems)[number]) =>
+      sp.matter.topics.some((mt) => mt.topic.slug === "honorary");
+    const proceduralSponsored = sponsoredItems.filter((sp) =>
+      isProcedural(sp.matter.title),
+    ).length;
+    const substantiveItems = sponsoredItems.filter(
+      (sp) => !isHonorary(sp) && !isProcedural(sp.matter.title),
+    );
+    const substantiveSponsored = substantiveItems.length;
+    const passedSubstantiveSponsored = substantiveItems.filter((sp) =>
+      PASSED.test(sp.matter.status || ""),
     ).length;
 
     // Focus areas: topic counts across everything they authored.
@@ -100,6 +110,8 @@ async function run() {
       cosponsored,
       passedSponsored,
       substantiveSponsored,
+      passedSubstantiveSponsored,
+      proceduralSponsored,
       topTopics,
     };
   });

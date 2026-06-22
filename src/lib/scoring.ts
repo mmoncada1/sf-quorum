@@ -19,7 +19,9 @@ export interface RawStats {
   sponsored: number;
   cosponsored: number;
   passedSponsored: number;
-  substantiveSponsored: number; // sponsored items that are NOT honorary/symbolic
+  substantiveSponsored: number; // sponsored items that are NOT honorary/symbolic/procedural
+  passedSubstantiveSponsored: number; // substantive sponsored items that passed
+  proceduralSponsored: number; // routine procedural items (e.g. response-time extensions)
   topTopics: { slug: string; name: string; emoji: string; count: number }[];
 }
 
@@ -64,10 +66,12 @@ export function scoreCohort(raws: RawStats[]): ScoredStats[] {
     const attendanceRate = safeDiv(r.present, r.totalVotes);
     const dissentRate = safeDiv(r.dissentVotes, r.present);
     const substanceRatio = safeDiv(r.substantiveSponsored, r.sponsored);
-    const activityRaw = r.sponsored + 0.4 * r.cosponsored;
-    // Impact rewards getting substantive things passed, not symbolic volume.
+    // Procedural housekeeping counts, but only a quarter as much as real bills.
+    const activityRaw =
+      r.sponsored - 0.75 * r.proceduralSponsored + 0.4 * r.cosponsored;
+    // Impact rewards getting substantive things passed, not procedural/symbolic volume.
     const impactRaw =
-      r.passedSponsored * 1.0 +
+      r.passedSubstantiveSponsored * 1.0 +
       r.substantiveSponsored * 0.5 +
       r.cosponsored * 0.15;
     return { r, attendanceRate, dissentRate, substanceRatio, activityRaw, impactRaw };

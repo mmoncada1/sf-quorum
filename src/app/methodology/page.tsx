@@ -60,11 +60,16 @@ export default function MethodologyPage() {
           <li>
             <strong className="font-semibold text-ink">Impact</strong> rewards
             getting substantive legislation actually passed into law. Honorary and
-            purely symbolic resolutions are weighted near zero on purpose.
+            purely symbolic resolutions are weighted near zero on purpose, and
+            routine procedural items (such as the bulk &ldquo;extend the
+            response deadline&rdquo; resolutions) are excluded so they
+            can&apos;t pad the number.
           </li>
           <li>
             <strong className="font-semibold text-ink">Activity</strong> measures
             how much original legislation the supervisor authors and co-sponsors.
+            Procedural housekeeping still counts, but only a quarter as much as a
+            real bill.
           </li>
           <li>
             <strong className="font-semibold text-ink">Attendance</strong> is the
