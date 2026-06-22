@@ -51,10 +51,13 @@ export default function MethodologyPage() {
 
       <Section title="The scores">
         <p>
-          Each supervisor gets four sub-scores, then one overall score. Sub-scores
-          are <em>relative</em>: the leader in each category is set to 100 and
-          everyone else is measured against them, so this is a true ranking of the
-          current Board, not an absolute grade.
+          Each supervisor gets four sub-scores, then one overall score. Impact,
+          Activity, and Attendance are scored against <em>absolute</em> targets
+          &mdash; a fixed bar for what strong performance looks like per month in
+          office &mdash; so a single prolific outlier can&apos;t crush everyone
+          else&apos;s grade and a score means the same thing from one board to the
+          next. Independence is the lone <em>relative</em> measure, since
+          &ldquo;dissent&rdquo; only has meaning compared to the rest of the group.
         </p>
         <ul className="ml-5 list-disc space-y-2">
           <li>

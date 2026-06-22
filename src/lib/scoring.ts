@@ -2,11 +2,28 @@
  * The "athlete stats" engine.
  *
  * Turns raw vote/sponsorship aggregates into a comparable scorecard per
- * supervisor. Scores are RELATIVE to the current cohort (the leader in a
- * category sets the 100), so the leaderboard is a real ranking rather than an
- * arbitrary absolute scale. Everything here is pure + deterministic so the
- * methodology page can explain exactly how a number was produced.
+ * supervisor. Impact, Activity and Attendance are scored against ABSOLUTE
+ * targets (a fixed bar for what strong performance looks like per month in
+ * office), so a single outlier can't crush the rest of the field and a grade
+ * means the same thing regardless of who else is on the board. Independence
+ * stays relative to the cohort, because "dissent" only has meaning versus the
+ * group. Everything here is pure + deterministic so the methodology page can
+ * explain exactly how a number was produced.
  */
+
+/**
+ * Absolute monthly targets that earn a full 100 in each count-based pillar.
+ * Calibrated so a highly productive supervisor reaches ~100 and the typical
+ * member lands in a sensible middle band. These are normative bars, not
+ * derived from the current roster, so scores are stable over time.
+ */
+const ACTIVITY_TARGET_PER_MONTH = 5; // authored-bill-equivalents / month
+const IMPACT_TARGET_PER_MONTH = 3.5; // weighted passed/substantive work / month
+
+function pct(rate: number, target: number): number {
+  if (target <= 0) return 0;
+  return Math.round(Math.min(100, Math.max(0, (rate / target) * 100)));
+}
 
 export interface RawStats {
   supervisorId: number;
@@ -83,13 +100,12 @@ export function scoreCohort(raws: RawStats[]): ScoredStats[] {
     return { r, attendanceRate, dissentRate, substanceRatio, activityRaw, impactRaw };
   });
 
-  const normActivity = normalize(withRates.map((x) => x.activityRaw));
-  const normImpact = normalize(withRates.map((x) => x.impactRaw));
+  // Independence is the only pillar that stays relative to the cohort.
   const normIndep = normalize(withRates.map((x) => x.dissentRate));
 
   const scored: ScoredStats[] = withRates.map((x) => {
-    const activityScore = normActivity(x.activityRaw);
-    const impactScore = normImpact(x.impactRaw);
+    const activityScore = pct(x.activityRaw, ACTIVITY_TARGET_PER_MONTH);
+    const impactScore = pct(x.impactRaw, IMPACT_TARGET_PER_MONTH);
     const independence = normIndep(x.dissentRate);
     const attendanceScore = Math.round(x.attendanceRate * 100);
     const overallScore =
