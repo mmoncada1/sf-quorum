@@ -84,6 +84,15 @@ export default function MethodologyPage() {
           </li>
         </ul>
         <p>
+          <strong className="font-semibold text-ink">Time served</strong> is
+          accounted for: Impact and Activity are measured as a rate per month in
+          office over the current session, so a supervisor appointed partway
+          through (for example, a mid-term replacement) is judged on pace rather
+          than raw totals and isn&apos;t penalized for having had fewer chances
+          to legislate. Attendance and Independence are already rates, so they
+          are time-fair by construction.
+        </p>
+        <p>
           The <strong className="font-semibold text-ink">overall score</strong>{" "}
           weights these as 40% Impact, 30% Activity, 20% Attendance, 10%
           Independence. Letter grades map linearly from the overall score (A+ at

@@ -7,6 +7,7 @@ import "dotenv/config";
 import { prisma } from "../src/lib/db";
 import { scoreCohort, type RawStats } from "../src/lib/scoring";
 import { isProcedural } from "../src/lib/summarize";
+import { termStartForDistrict, monthsBetween } from "../src/lib/terms";
 
 function log(...args: unknown[]) {
   console.log(`[compute ${new Date().toISOString().slice(11, 19)}]`, ...args);
@@ -18,6 +19,29 @@ const ABSENT_VALUES = new Set(["Excused", "Absent"]);
 
 async function run() {
   const supervisors = await prisma.supervisor.findMany({ where: { active: true } });
+
+  // Backfill term-start dates so "in office since" + time-normalization work.
+  for (const s of supervisors) {
+    const ts = termStartForDistrict(s.district);
+    if (ts && s.termStart?.getTime() !== ts.getTime()) {
+      await prisma.supervisor.update({ where: { id: s.id }, data: { termStart: ts } });
+      s.termStart = ts;
+    }
+  }
+
+  // The dataset is effectively the current session: measure pace over the
+  // calendar year that holds the bulk of the data.
+  const lastAction = await prisma.action.findFirst({
+    where: { date: { not: null } },
+    orderBy: { date: "desc" },
+    select: { date: true },
+  });
+  const windowEnd = lastAction?.date ?? new Date();
+  const windowStart = new Date(Date.UTC(windowEnd.getUTCFullYear(), 0, 1));
+  const exposureFor = (termStart: Date | null | undefined): number => {
+    const start = termStart && termStart > windowStart ? termStart : windowStart;
+    return Math.max(1, monthsBetween(start, windowEnd));
+  };
 
   const votes = await prisma.vote.findMany({
     select: { supervisorId: true, value: true, actionId: true },
@@ -112,6 +136,7 @@ async function run() {
       substantiveSponsored,
       passedSubstantiveSponsored,
       proceduralSponsored,
+      exposureMonths: exposureFor(s.termStart),
       topTopics,
     };
   });

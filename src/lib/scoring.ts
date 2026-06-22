@@ -22,6 +22,7 @@ export interface RawStats {
   substantiveSponsored: number; // sponsored items that are NOT honorary/symbolic/procedural
   passedSubstantiveSponsored: number; // substantive sponsored items that passed
   proceduralSponsored: number; // routine procedural items (e.g. response-time extensions)
+  exposureMonths: number; // months in office within the data window (>= 1)
   topTopics: { slug: string; name: string; emoji: string; count: number }[];
 }
 
@@ -67,13 +68,18 @@ export function scoreCohort(raws: RawStats[]): ScoredStats[] {
     const dissentRate = safeDiv(r.dissentVotes, r.present);
     const substanceRatio = safeDiv(r.substantiveSponsored, r.sponsored);
     // Procedural housekeeping counts, but only a quarter as much as real bills.
-    const activityRaw =
+    const activityVolume =
       r.sponsored - 0.75 * r.proceduralSponsored + 0.4 * r.cosponsored;
     // Impact rewards getting substantive things passed, not procedural/symbolic volume.
-    const impactRaw =
+    const impactVolume =
       r.passedSubstantiveSponsored * 1.0 +
       r.substantiveSponsored * 0.5 +
       r.cosponsored * 0.15;
+    // Normalize by time served so a newer member isn't penalized for fewer
+    // chances to legislate: these become "per month in office" rates.
+    const months = Math.max(1, r.exposureMonths);
+    const activityRaw = activityVolume / months;
+    const impactRaw = impactVolume / months;
     return { r, attendanceRate, dissentRate, substanceRatio, activityRaw, impactRaw };
   });
 

@@ -13,6 +13,7 @@ import {
   VotePill,
 } from "@/components/ui";
 import { fmtDate, ordinal } from "@/lib/format";
+import { monthsBetween, monthYear } from "@/lib/terms";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +59,9 @@ export default async function SupervisorPage({
     });
   const maxTopic = Math.max(1, ...topTopics.map((t) => t.count));
   const report = scoutingReport(sup.fullName, st, topTopics[0]?.name);
+  const tenureMonths = sup.termStart
+    ? monthsBetween(sup.termStart, new Date())
+    : null;
 
   return (
     <div className="space-y-10">
@@ -80,6 +84,14 @@ export default async function SupervisorPage({
               <span className="text-muted">{sup.title}</span>
               {st?.rank ? (
                 <span className="text-faint">· {ordinal(st.rank)} overall</span>
+              ) : null}
+              {sup.termStart ? (
+                <span className="text-faint">
+                  · In office since {monthYear(sup.termStart)}
+                  {tenureMonths != null
+                    ? ` (${tenureMonths < 12 ? `${tenureMonths} mo` : `${(tenureMonths / 12).toFixed(1)} yr`})`
+                    : ""}
+                </span>
               ) : null}
             </div>
             <h1 className="mt-2.5 font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
