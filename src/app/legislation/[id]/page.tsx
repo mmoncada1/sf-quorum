@@ -64,12 +64,6 @@ export default async function MatterPage({
             <p className="text-lg font-semibold leading-snug text-ink">
               {m.summary}
             </p>
-            {m.summarySource === "heuristic" ? (
-              <p className="mt-2 text-xs text-muted">
-                Auto-generated from the official title. Add an LLM key for richer
-                summaries.
-              </p>
-            ) : null}
           </div>
         ) : null}
 
