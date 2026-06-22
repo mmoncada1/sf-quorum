@@ -1,0 +1,79 @@
+name: Refresh SF legislative data
+
+# Keeps the dataset current by re-crawling sfgov.legistar.com on a schedule and
+# committing the refreshed SQLite database back to the repo.
+
+on:
+  schedule:
+    # Daily at 12:00 UTC (~4-5am Pacific). The Board meets Tuesdays; committees
+    # run on weekdays, so a daily pull keeps votes and bills current.
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+    inputs:
+      max_meetings:
+        description: "How many recent meetings to ingest"
+        required: false
+        default: "40"
+      years:
+        description: "Comma-separated years to crawl (blank = current year)"
+        required: false
+        default: ""
+
+concurrency:
+  group: data-refresh
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: "file:./dev.db"
+      LEGISTAR_HOST: "https://sfgov.legistar.com"
+      INGEST_MAX_MEETINGS: ${{ github.event.inputs.max_meetings || '40' }}
+      INGEST_YEARS: ${{ github.event.inputs.years || '' }}
+      # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}  # optional: richer summaries
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Create fresh database
+        run: |
+          rm -f prisma/dev.db
+          npx prisma db push --skip-generate
+
+      - name: Ingest (crawl Legistar)
+        run: npm run ingest
+
+      - name: Enrich (summaries + topics)
+        run: npm run enrich
+
+      - name: Compute (stats + leaderboard)
+        run: npm run compute
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f prisma/dev.db
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "chore(data): automated refresh $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push
+          fi
