@@ -24,4 +24,32 @@ echo "===== $(date '+%Y-%m-%d %H:%M:%S') refresh start (node $(node -v 2>/dev/nu
 npm run refresh
 status=$?
 echo "===== $(date '+%Y-%m-%d %H:%M:%S') refresh end (exit $status) ====="
+
+# Publish the refreshed data so the deployed (Vercel) site updates. We commit
+# ONLY prisma/dev.db via a pathspec so any unrelated work-in-progress in the
+# working tree is left untouched. Pushing the new commit triggers a Vercel
+# redeploy with the fresh dataset. This replaces the (paid) GitHub Action.
+if [ "$status" -eq 0 ]; then
+  git -C "$PROJECT_DIR" add prisma/dev.db
+  if git -C "$PROJECT_DIR" diff --cached --quiet -- prisma/dev.db; then
+    echo "[publish] no data changes to commit"
+  else
+    stamp=$(date -u '+%Y-%m-%dT%H:%MZ')
+    git -C "$PROJECT_DIR" commit -m "chore(data): local refresh $stamp" -- prisma/dev.db
+    if git -C "$PROJECT_DIR" push origin HEAD:main; then
+      echo "[publish] pushed refreshed data ($stamp)"
+    else
+      echo "[publish] push failed — attempting rebase on origin/main"
+      if git -C "$PROJECT_DIR" pull --rebase --autostash origin main \
+        && git -C "$PROJECT_DIR" push origin HEAD:main; then
+        echo "[publish] pushed after rebase ($stamp)"
+      else
+        echo "[publish] PUSH STILL FAILED — resolve manually (commit is local)"
+      fi
+    fi
+  fi
+else
+  echo "[publish] skipped (refresh failed, exit $status)"
+fi
+
 exit $status

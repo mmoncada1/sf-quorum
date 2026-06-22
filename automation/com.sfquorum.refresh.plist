@@ -11,7 +11,8 @@
     <string>/Users/miguelmoncada/Documents/SF Votes/scripts/refresh-local.sh</string>
   </array>
 
-  <!-- Run every day at 6:30am local time. -->
+  <!-- Run every day at 6:30am local time. If the Mac is asleep at 6:30, launchd
+       coalesces the missed run and fires it once shortly after the next wake. -->
   <key>StartCalendarInterval</key>
   <dict>
     <key>Hour</key>
