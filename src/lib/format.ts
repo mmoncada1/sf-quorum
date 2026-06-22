@@ -18,31 +18,37 @@ export function pct(n: number): string {
   return `${Math.round(n * 100)}%`;
 }
 
-/** Solid neo-brutalist block for a vote value. */
+/** Tinted wash + dark text for a roll-call vote value. */
 export function voteBg(value: string): string {
   const v = value.toLowerCase();
-  if (v === "aye") return "bg-win text-black";
-  if (v === "no") return "bg-loss text-black";
-  if (v === "excused" || v === "absent") return "bg-zinc-200 text-black";
-  return "bg-bw text-black";
+  if (v === "aye") return "bg-yeaWash text-yea";
+  if (v === "no") return "bg-nayWash text-nay";
+  if (v === "excused" || v === "absent") return "bg-neutralWash text-muted";
+  return "bg-neutralWash text-muted";
 }
 
-/** Solid background block for a letter grade. */
+/** Tinted wash + dark text for a letter grade. */
 export function gradeBg(grade: string | null | undefined): string {
-  if (!grade) return "bg-zinc-200 text-black";
-  if (grade.startsWith("A")) return "bg-win text-black";
-  if (grade.startsWith("B")) return "bg-info text-black";
-  if (grade.startsWith("C")) return "bg-gold text-black";
-  if (grade.startsWith("D")) return "bg-main text-black";
-  return "bg-loss text-black";
+  if (!grade) return "bg-neutralWash text-muted";
+  if (grade.startsWith("A")) return "bg-yeaWash text-yea";
+  if (grade.startsWith("B")) return "bg-slateWash text-slate";
+  if (grade.startsWith("C")) return "bg-amberWash text-amber";
+  if (grade.startsWith("D")) return "bg-accentWash text-accent-ink";
+  return "bg-nayWash text-nay";
 }
 
-/** Hex used for solid stat-bar fills. */
+/** Ink color expressing performance, used for the metric numerals. */
+export function scoreInk(score: number): string {
+  if (score >= 67) return "text-yea";
+  if (score >= 34) return "text-ink";
+  return "text-nay";
+}
+
+/** Fill color for a thin meter. Neutral by default. */
 export function scoreFill(score: number): string {
-  if (score >= 74) return "var(--win)";
-  if (score >= 50) return "var(--gold)";
-  if (score >= 34) return "var(--main)";
-  return "var(--loss)";
+  if (score >= 67) return "var(--yea)";
+  if (score >= 34) return "var(--ink)";
+  return "var(--nay)";
 }
 
 export function ordinal(n: number): string {
@@ -60,16 +66,16 @@ export function initials(name: string): string {
     .join("");
 }
 
-/** Deterministic bright block color for avatars/blocks. */
+/** Deterministic, desaturated block color for avatars (paper text on top). */
 const BLOCK_COLORS = [
-  "#ff5a36",
-  "#34d97b",
-  "#ffd23f",
-  "#4d9de0",
-  "#b388ff",
-  "#ff5d52",
-  "#ff9f1c",
-  "#2ec4b6",
+  "#2f3a46", // slate
+  "#5a4632", // umber
+  "#3d4d3a", // moss
+  "#4a3b52", // plum
+  "#3a4a5a", // steel
+  "#5a3438", // oxblood
+  "#46433a", // olive-ink
+  "#34454a", // teal-ink
 ];
 
 export function blockColor(seed: number | string): string {

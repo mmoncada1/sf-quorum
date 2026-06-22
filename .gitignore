@@ -39,3 +39,7 @@ next-env.d.ts
 
 # scraper cache
 /.cache/
+
+# Local design skills tooling
+.agents/
+skills-lock.json

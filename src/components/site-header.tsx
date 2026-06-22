@@ -25,36 +25,37 @@ export function SiteHeader() {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-40 border-b-2 border-border bg-bg/95 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+    <header className="sticky top-0 z-40 border-b border-line bg-[rgba(244,243,240,0.82)] backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3.5">
         <Link
           href="/"
           className="flex items-center gap-2.5"
           onClick={() => setOpen(false)}
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-base border-2 border-border bg-main font-heading text-sm text-black shadow-nbsm">
+          <span className="flex h-8 w-8 items-center justify-center rounded bg-ink font-mono text-xs font-bold text-paper">
             SF
           </span>
-          <span className="font-display text-lg font-heading uppercase tracking-tight text-black">
+          <span className="font-display text-lg font-bold tracking-tight text-ink">
             Quorum
           </span>
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-1.5 text-sm md:flex">
+        <nav className="hidden items-center gap-6 text-sm md:flex">
           {NAV.map((n) => {
             const active = isActive(pathname, n.href);
             return (
               <Link
                 key={n.href}
                 href={n.href}
-                className={`rounded-base border-2 px-3 py-1.5 font-bold text-black transition-all ${
-                  active
-                    ? "border-border bg-main shadow-nbsm"
-                    : "border-transparent hover:border-border hover:bg-bw hover:shadow-nbsm"
+                className={`relative font-medium transition-colors hover:text-ink ${
+                  active ? "text-ink" : "text-muted"
                 }`}
               >
                 {n.label}
+                {active ? (
+                  <span className="absolute -bottom-[18px] left-0 right-0 h-0.5 bg-accent" />
+                ) : null}
               </Link>
             );
           })}
@@ -66,7 +67,7 @@ export function SiteHeader() {
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="flex h-10 w-10 items-center justify-center rounded-base border-2 border-border bg-bw text-black shadow-nbsm transition-all active:translate-x-boxShadowX active:translate-y-boxShadowY active:shadow-none md:hidden"
+          className="flex h-9 w-9 items-center justify-center rounded-md border border-line-strong bg-surface text-ink transition-colors hover:border-ink md:hidden"
         >
           {open ? (
             <svg
@@ -75,7 +76,7 @@ export function SiteHeader() {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2.5"
+              strokeWidth="2"
               strokeLinecap="round"
             >
               <path d="M6 6l12 12M18 6L6 18" />
@@ -87,7 +88,7 @@ export function SiteHeader() {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2.5"
+              strokeWidth="2"
               strokeLinecap="round"
             >
               <path d="M4 7h16M4 12h16M4 17h16" />
@@ -98,8 +99,8 @@ export function SiteHeader() {
 
       {/* Mobile menu panel */}
       {open && (
-        <nav className="border-t-2 border-border bg-bg px-4 py-3 md:hidden">
-          <div className="flex flex-col gap-2">
+        <nav className="border-t border-line bg-surface px-4 py-2 md:hidden">
+          <div className="flex flex-col">
             {NAV.map((n) => {
               const active = isActive(pathname, n.href);
               return (
@@ -107,8 +108,8 @@ export function SiteHeader() {
                   key={n.href}
                   href={n.href}
                   onClick={() => setOpen(false)}
-                  className={`rounded-base border-2 border-border px-4 py-3 font-heading uppercase tracking-tight text-black shadow-nbsm transition-all active:translate-x-boxShadowX active:translate-y-boxShadowY active:shadow-none ${
-                    active ? "bg-main" : "bg-bw"
+                  className={`border-b border-line py-3 text-sm font-medium last:border-0 ${
+                    active ? "text-accent" : "text-ink"
                   }`}
                 >
                   {n.label}

@@ -2,33 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Neobrutalism theme tokens */
+/*
+ * SF Quorum design system — editorial / sports-almanac.
+ * Neutral paper, ink, a single vermilion accent, restrained green/crimson for
+ * box-score data. Hairline rules instead of heavy borders + offset shadows.
+ */
 :root {
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-display: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-sans);
 
-  --bg: #f4f0e6;
-  --bw: #ffffff;
-  --blank: #000000;
-  --border: #000000;
-  --text: #000000;
-  --mtext: #000000;
-  --ring: #000000;
-  --ring-offset: #ffffff;
+  --paper: #f4f3f0;
+  --surface: #ffffff;
+  --ink: #1a1a1d;
+  --muted: #57575d;
+  --faint: #8b8b91;
+  --line: #e6e5e0;
+  --line-strong: #d2d1cb;
 
-  --main: #ff5a36;
-  --main-accent: #e63e1c;
-  --overlay: rgba(0, 0, 0, 0.8);
+  --accent: #df382a;
+  --accent-ink: #b22317;
+  --accent-wash: #fbe9e6;
 
-  --win: #34d97b;
-  --loss: #ff5d52;
-  --gold: #ffd23f;
-  --info: #4d9de0;
-  --grape: #b388ff;
+  --yea: #1c7a43;
+  --yea-wash: #e7f1ea;
+  --nay: #a52219;
+  --nay-wash: #f7e8e6;
+  --amber: #8a6410;
+  --amber-wash: #f4edda;
+  --slate: #3f4a57;
+  --slate-wash: #e9ecef;
+  --neutral-wash: #efeee9;
 
-  --box-shadow-x: 4px;
-  --box-shadow-y: 4px;
-  --shadow: var(--box-shadow-x) var(--box-shadow-y) 0px 0px var(--border);
+  /* Legacy token aliases mapped onto the new system (used by older markup). */
+  --bg: var(--paper);
+  --bw: var(--surface);
+  --blank: var(--ink);
+  --border: var(--line);
+  --text: var(--ink);
+  --mtext: var(--ink);
+  --ring: var(--ink);
+  --ring-offset: var(--surface);
+  --main: var(--accent);
+  --main-accent: var(--accent-ink);
+  --overlay: rgba(20, 20, 22, 0.55);
+  --win: var(--yea);
+  --loss: var(--nay);
+  --gold: var(--amber);
+  --info: var(--slate);
+  --grape: #5b5670;
 }
 
 html {
@@ -36,47 +56,75 @@ html {
 }
 
 body {
-  background-color: var(--bg);
-  background-image: radial-gradient(rgba(0, 0, 0, 0.13) 1.5px, transparent 1.5px);
-  background-size: 22px 22px;
-  color: var(--text);
-  font-weight: 500;
+  background-color: var(--paper);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 @layer base {
-  h1, h2, h3 {
-    @apply font-heading;
+  h1,
+  h2,
+  h3 {
+    @apply font-display tracking-tight;
+    font-weight: 800;
+  }
+  h1 {
+    text-wrap: balance;
+    letter-spacing: -0.025em;
+  }
+  ::selection {
+    background: var(--accent);
+    color: #fff;
+  }
+  a {
+    text-underline-offset: 2px;
   }
 }
 
 @layer components {
+  /* Surfaces */
   .nb-card {
-    @apply rounded-base border-2 border-border bg-bw shadow-shadow;
+    @apply rounded-lg border border-line bg-surface;
   }
   .nb-flat {
-    @apply rounded-base border-2 border-border bg-bw;
+    @apply rounded-lg border border-line bg-surface;
   }
   .nb-press {
-    @apply transition-all duration-150 hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none;
+    @apply transition-colors duration-150 hover:border-line-strong;
   }
+
+  /* Chips & labels */
   .nb-chip {
-    @apply inline-flex items-center gap-1 rounded-base border-2 border-border bg-bw px-2.5 py-0.5 text-xs font-bold text-text;
-  }
-  .nb-btn {
-    @apply inline-flex items-center justify-center rounded-base border-2 border-border bg-main px-5 py-2.5 text-sm font-heading text-text shadow-shadow transition-all duration-150 hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none;
-  }
-  .nb-btn-bw {
-    @apply inline-flex items-center justify-center rounded-base border-2 border-border bg-bw px-5 py-2.5 text-sm font-heading text-text shadow-shadow transition-all duration-150 hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none;
-  }
-  .nb-track {
-    @apply h-3 w-full overflow-hidden rounded-base border-2 border-border bg-bw;
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-0.5 text-xs font-medium text-muted;
   }
   .kicker {
-    @apply inline-block rounded-base border-2 border-border bg-main px-2 py-0.5 text-[11px] font-heading uppercase tracking-wide text-text;
+    @apply inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent;
+  }
+
+  /* Buttons */
+  .nb-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-accent-ink;
+  }
+  .nb-btn-bw {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-line-strong bg-surface px-5 py-2.5 text-sm font-semibold text-ink transition-colors duration-150 hover:border-ink;
+  }
+
+  /* Thin baseline meter (no boxed track) */
+  .nb-track {
+    @apply h-1.5 w-full overflow-hidden rounded-full bg-line;
   }
 }
 
-::-webkit-scrollbar { width: 12px; height: 12px; }
-::-webkit-scrollbar-thumb { background: #000; border: 2px solid var(--bg); }
-::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 999px;
+  border: 3px solid var(--paper);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}

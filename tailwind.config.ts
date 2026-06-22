@@ -1,6 +1,5 @@
 import type { Config } from "tailwindcss";
 
-// Neobrutalism design tokens (neobrutalism.dev convention, Tailwind v3 setup).
 const config: Config = {
   content: [
     "./src/app/**/*.{ts,tsx}",
@@ -9,6 +8,30 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Editorial system
+        paper: "var(--paper)",
+        surface: "var(--surface)",
+        ink: "var(--ink)",
+        muted: "var(--muted)",
+        faint: "var(--faint)",
+        line: "var(--line)",
+        lineStrong: "var(--line-strong)",
+        "line-strong": "var(--line-strong)",
+        accent: "var(--accent)",
+        accentInk: "var(--accent-ink)",
+        "accent-ink": "var(--accent-ink)",
+        accentWash: "var(--accent-wash)",
+        yea: "var(--yea)",
+        yeaWash: "var(--yea-wash)",
+        nay: "var(--nay)",
+        nayWash: "var(--nay-wash)",
+        amber: "var(--amber)",
+        amberWash: "var(--amber-wash)",
+        slate: "var(--slate)",
+        slateWash: "var(--slate-wash)",
+        neutralWash: "var(--neutral-wash)",
+
+        // Legacy aliases (older markup still references these)
         main: "var(--main)",
         mainAccent: "var(--main-accent)",
         overlay: "var(--overlay)",
@@ -20,36 +43,26 @@ const config: Config = {
         border: "var(--border)",
         ring: "var(--ring)",
         ringOffset: "var(--ring-offset)",
-        secondaryBlack: "#212121",
-        // Bright category blocks
         win: "var(--win)",
         loss: "var(--loss)",
         gold: "var(--gold)",
         info: "var(--info)",
         grape: "var(--grape)",
       },
-      borderRadius: {
-        base: "6px",
-      },
-      boxShadow: {
-        shadow: "var(--shadow)",
-        nbsm: "2px 2px 0px 0px var(--border)",
-        nblg: "8px 8px 0px 0px var(--border)",
-      },
-      translate: {
-        boxShadowX: "4px",
-        boxShadowY: "4px",
-        reverseBoxShadowX: "-4px",
-        reverseBoxShadowY: "-4px",
+      fontFamily: {
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
       },
       fontWeight: {
         base: "500",
         heading: "800",
       },
-      fontFamily: {
-        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "system-ui", "sans-serif"],
-        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+      borderRadius: {
+        base: "6px",
+      },
+      maxWidth: {
+        prose: "68ch",
       },
     },
   },

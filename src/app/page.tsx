@@ -7,8 +7,6 @@ import { TOPICS } from "@/lib/topics";
 
 export const dynamic = "force-dynamic";
 
-const TILE_COLORS = ["bg-main", "bg-win", "bg-info", "bg-gold"];
-
 export default async function HomePage() {
   const [overview, leaders, recent] = await Promise.all([
     getOverview(),
@@ -20,127 +18,117 @@ export default async function HomePage() {
   const bottom = leaders.slice(-1)[0];
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-20">
       {/* Hero */}
-      <section className="nb-card overflow-hidden p-6 sm:p-10">
-        <div className="max-w-3xl">
-          <div className="kicker mb-4 !bg-win">● LIVE FROM SFGOV.LEGISTAR.COM</div>
-          <h1 className="font-display text-4xl font-heading uppercase leading-[0.95] tracking-tight text-black sm:text-6xl">
-            What is the Board of Supervisors{" "}
-            <span className="bg-main px-2 leading-tight">actually doing</span>{" "}
-            this week?
-          </h1>
-          <p className="mt-5 max-w-2xl text-lg font-medium text-black/80">
-            Every ordinance, resolution and motion before the Board — translated
-            into plain English — plus a live scorecard of how each of the 11
-            district supervisors votes, what they focus on, and who actually gets
-            things done.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/leaderboard" className="nb-btn">
-              SEE THE LEADERBOARD →
-            </Link>
-            <Link href="/legislation" className="nb-btn-bw">
-              Browse legislation
-            </Link>
-          </div>
+      <section className="pt-2 sm:pt-6">
+        <div className="kicker mb-5">San Francisco Board of Supervisors</div>
+        <h1 className="max-w-4xl font-display text-4xl font-extrabold leading-[1.02] tracking-tight text-ink sm:text-5xl lg:text-6xl">
+          What is City Hall <span className="text-accent">actually doing</span>{" "}
+          this week?
+        </h1>
+        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
+          Every ordinance, resolution, and motion before the Board, translated
+          into plain English, with a live scorecard of how all eleven district
+          supervisors vote and what they actually get done.
+        </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link href="/leaderboard" className="nb-btn">
+            See the leaderboard
+          </Link>
+          <Link href="/legislation" className="nb-btn-bw">
+            Browse legislation
+          </Link>
         </div>
 
-        <dl className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <Stat label="Legislation tracked" value={overview.matters} color={TILE_COLORS[0]} />
-          <Stat label="Votes recorded" value={overview.votes} color={TILE_COLORS[1]} />
-          <Stat label="Meetings ingested" value={overview.meetings} color={TILE_COLORS[2]} />
+        <dl className="mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-4">
+          <Stat label="Legislation tracked" value={overview.matters.toLocaleString()} />
+          <Stat label="Votes recorded" value={overview.votes.toLocaleString()} />
+          <Stat label="Meetings ingested" value={overview.meetings.toLocaleString()} />
           <Stat
             label="Last updated"
-            valueText={
+            value={
               overview.lastIngest?.finishedAt
                 ? fmtAgo(overview.lastIngest.finishedAt)
                 : "—"
             }
-            color={TILE_COLORS[3]}
           />
         </dl>
       </section>
 
-      {/* Leaderboard preview */}
+      {/* Standings */}
       {top3.length > 0 && (
         <section>
           <SectionTitle
-            kicker="The standings"
             action={
               <Link
                 href="/leaderboard"
-                className="font-bold text-black underline decoration-2 underline-offset-2 hover:text-main"
+                className="text-sm font-medium text-muted underline decoration-line decoration-2 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
               >
-                Full leaderboard →
+                Full leaderboard
               </Link>
             }
           >
-            Supervisor power rankings
+            Power rankings
           </SectionTitle>
           <div className="grid gap-4 md:grid-cols-3">
             {top3.map((s, i) => (
               <Link
                 key={s.id}
                 href={`/supervisors/${s.slug}`}
-                className="nb-card nb-press group relative overflow-hidden p-5"
+                className="nb-card nb-press group relative block overflow-hidden p-5"
               >
-                <div className="absolute right-3 top-1 font-display text-6xl font-heading text-black/10">
+                <span className="absolute right-4 top-2 font-mono text-5xl font-bold tabular-nums text-line">
                   {ordinal(i + 1)}
-                </div>
+                </span>
                 <div className="flex items-center gap-3">
-                  <Avatar name={s.fullName} district={s.district} size={48} />
-                  <div>
-                    <div className="font-heading text-black">{s.fullName}</div>
-                    <div className="text-xs font-bold text-black/60">
+                  <Avatar name={s.fullName} district={s.district} size={44} />
+                  <div className="min-w-0">
+                    <div className="truncate font-semibold text-ink">
+                      {s.fullName}
+                    </div>
+                    <div className="text-xs text-muted">
                       District {s.district} · {s.title}
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 flex items-end justify-between">
+                <div className="mt-5 flex items-end justify-between">
                   <div>
-                    <div className="text-xs font-bold uppercase text-black/60">
-                      Overall score
+                    <div className="font-mono text-[11px] uppercase tracking-wider text-muted">
+                      Overall
                     </div>
                     <ScoreNumber score={s.stats!.overallScore} />
                   </div>
-                  <GradeBadge grade={s.stats!.grade} className="h-12 min-w-12 text-2xl" />
+                  <GradeBadge grade={s.stats!.grade} className="h-11 min-w-11 text-2xl" />
                 </div>
-                <div className="mt-3 flex flex-wrap gap-1.5">
+                <div className="mt-4 flex flex-wrap gap-1.5">
                   {s.topTopics.slice(0, 2).map((t) => (
-                    <TopicChip key={t.slug} emoji={t.emoji} name={t.name} />
+                    <TopicChip key={t.slug} name={t.name} />
                   ))}
                 </div>
               </Link>
             ))}
           </div>
           {bottom && bottom.stats && (
-            <div className="mt-4 nb-flat bg-loss/20 p-3 text-center text-sm font-bold text-black">
+            <p className="mt-4 text-sm text-muted">
               Bringing up the rear:{" "}
               <Link
                 href={`/supervisors/${bottom.slug}`}
-                className="underline decoration-2 underline-offset-2"
+                className="font-semibold text-ink underline decoration-line decoration-2 underline-offset-2 hover:text-accent hover:decoration-accent"
               >
                 {bottom.fullName} (D{bottom.district})
-              </Link>{" "}
-              — grade {bottom.stats.grade}.
-            </div>
+              </Link>
+              , grade {bottom.stats.grade}.
+            </p>
           )}
         </section>
       )}
 
       {/* Topics */}
       <section>
-        <SectionTitle kicker="By the numbers">Browse by policy area</SectionTitle>
+        <SectionTitle>Browse by policy area</SectionTitle>
         <div className="flex flex-wrap gap-2">
           {TOPICS.map((t) => (
-            <TopicChip
-              key={t.slug}
-              emoji={t.emoji}
-              name={t.name}
-              color={t.color}
-              href={`/legislation?topic=${t.slug}`}
-            />
+            <TopicChip key={t.slug} name={t.name} href={`/legislation?topic=${t.slug}`} />
           ))}
         </div>
       </section>
@@ -148,13 +136,12 @@ export default async function HomePage() {
       {/* Recent legislation */}
       <section>
         <SectionTitle
-          kicker="The feed"
           action={
             <Link
               href="/legislation"
-              className="font-bold text-black underline decoration-2 underline-offset-2 hover:text-main"
+              className="text-sm font-medium text-muted underline decoration-line decoration-2 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
             >
-              All legislation →
+              All legislation
             </Link>
           }
         >
@@ -174,22 +161,14 @@ export default async function HomePage() {
   );
 }
 
-function Stat({
-  label,
-  value,
-  valueText,
-  color = "bg-bw",
-}: {
-  label: string;
-  value?: number;
-  valueText?: string;
-  color?: string;
-}) {
+function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className={`rounded-base border-2 border-border p-4 shadow-nbsm ${color}`}>
-      <dt className="text-xs font-bold uppercase text-black/70">{label}</dt>
-      <dd className="mt-1 font-display text-2xl font-heading text-black">
-        {valueText ?? value?.toLocaleString()}
+    <div className="bg-surface p-5">
+      <dt className="font-mono text-[11px] uppercase tracking-wider text-muted">
+        {label}
+      </dt>
+      <dd className="mt-2 font-mono text-2xl font-bold tabular-nums text-ink">
+        {value}
       </dd>
     </div>
   );
@@ -197,9 +176,9 @@ function Stat({
 
 function EmptyState() {
   return (
-    <div className="nb-card p-8 text-center text-sm font-bold text-black/70">
+    <div className="nb-card p-10 text-center text-sm text-muted">
       No legislation ingested yet. Run{" "}
-      <code className="rounded-base border-2 border-border bg-main px-1.5 py-0.5 font-mono text-xs text-black">
+      <code className="rounded border border-line bg-paper px-1.5 py-0.5 font-mono text-xs text-ink">
         npm run refresh
       </code>{" "}
       to pull the latest from sfgov.legistar.com.

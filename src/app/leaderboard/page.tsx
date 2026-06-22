@@ -9,77 +9,81 @@ export default async function LeaderboardPage() {
   const leaders = await getLeaderboard();
 
   return (
-    <div className="space-y-8">
-      <header className="nb-card max-w-3xl p-6">
+    <div className="space-y-10">
+      <header className="max-w-prose">
         <div className="kicker mb-3">The standings</div>
-        <h1 className="font-display text-4xl font-heading uppercase tracking-tight text-black">
+        <h1 className="font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
           The Leaderboard
         </h1>
-        <p className="mt-3 font-medium text-black/80">
-          Eleven supervisors. One scoreboard. Every member of the Board is graded
-          on what they actually produce — substantive legislation passed, bills
+        <p className="mt-4 text-lg leading-relaxed text-muted">
+          Eleven supervisors, one scoreboard. Every member of the Board is graded
+          on what they actually produce: substantive legislation passed, bills
           authored, attendance at the dais, and willingness to break from the
-          pack. Symbolic, feel-good resolutions count for very little. Scores are
-          relative: the category leader sets the 100.
+          pack. Symbolic resolutions count for little. Scores are relative, so the
+          category leader sets the 100.
         </p>
       </header>
 
       {leaders.length === 0 ? (
-        <div className="nb-card p-8 text-center font-bold text-black/70">
-          No stats computed yet. Run <code className="text-main">npm run refresh</code>.
+        <div className="nb-card p-10 text-center text-muted">
+          No stats computed yet. Run{" "}
+          <code className="rounded border border-line bg-paper px-1.5 py-0.5 font-mono text-xs text-ink">
+            npm run refresh
+          </code>
+          .
         </div>
       ) : (
-        <ol className="space-y-4">
+        <ol className="overflow-hidden rounded-lg border border-line bg-surface">
           {leaders.map((s) => {
             const st = s.stats!;
             return (
-              <li key={s.id}>
+              <li key={s.id} className="border-b border-line last:border-0">
                 <Link
                   href={`/supervisors/${s.slug}`}
-                  className="nb-card nb-press group flex flex-col gap-5 p-5 lg:flex-row lg:items-center"
+                  className="group flex flex-col gap-5 p-5 transition-colors hover:bg-paper lg:flex-row lg:items-center"
                 >
                   {/* Rank + identity */}
                   <div className="flex items-center gap-4 lg:w-72">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-base border-2 border-border bg-bg font-display text-xl font-heading text-black">
+                    <div className="w-7 shrink-0 text-center font-mono text-xl font-bold tabular-nums text-faint">
                       {st.rank}
                     </div>
-                    <Avatar name={s.fullName} district={s.district} size={52} />
+                    <Avatar name={s.fullName} district={s.district} size={48} />
                     <div className="min-w-0">
-                      <div className="truncate font-heading text-black">
+                      <div className="truncate font-semibold text-ink">
                         {s.fullName}
                       </div>
-                      <div className="text-xs font-bold text-black/60">
+                      <div className="text-xs text-muted">
                         District {s.district} · {s.title}
                       </div>
                       <div className="mt-1.5 flex flex-wrap gap-1">
                         {s.topTopics.slice(0, 2).map((t) => (
-                          <TopicChip key={t.slug} emoji={t.emoji} name={t.name} />
+                          <TopicChip key={t.slug} name={t.name} />
                         ))}
                       </div>
                     </div>
                   </div>
 
                   {/* Score + grade */}
-                  <div className="flex items-center gap-4 lg:w-40">
+                  <div className="flex items-center gap-4 lg:w-36">
                     <div>
-                      <div className="text-[11px] font-bold uppercase tracking-wide text-black/60">
+                      <div className="font-mono text-[11px] uppercase tracking-wider text-muted">
                         Overall
                       </div>
                       <ScoreNumber score={st.overallScore} />
                     </div>
-                    <GradeBadge grade={st.grade} className="h-12 min-w-12 text-2xl" />
+                    <GradeBadge grade={st.grade} className="h-11 min-w-11 text-2xl" />
                   </div>
 
                   {/* Stat bars */}
                   <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-3">
-                    <StatBar label="Impact" value={st.impactScore} accent="var(--win)" />
-                    <StatBar label="Activity" value={st.activityScore} accent="var(--info)" />
-                    <StatBar label="Attendance" value={st.attendanceRate * 100} accent="var(--gold)" />
-                    <StatBar label="Independence" value={st.independence} accent="var(--main)" />
+                    <StatBar label="Impact" value={st.impactScore} />
+                    <StatBar label="Activity" value={st.activityScore} />
+                    <StatBar label="Attendance" value={st.attendanceRate * 100} />
+                    <StatBar label="Independence" value={st.independence} />
                   </div>
 
                   {/* Counts */}
-                  <div className="flex shrink-0 gap-5 border-t-2 border-border pt-3 text-center lg:border-l-2 lg:border-t-0 lg:pl-5 lg:pt-0">
+                  <div className="flex shrink-0 gap-6 border-t border-line pt-3 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
                     <Count label="Votes" value={st.totalVotes} />
                     <Count label="Authored" value={st.sponsored} />
                     <Count label="Passed" value={st.passedSponsored} />
@@ -98,10 +102,10 @@ export default async function LeaderboardPage() {
 function Count({ label, value }: { label: string; value: number | string }) {
   return (
     <div>
-      <div className="font-display text-lg font-heading tabular-nums text-black">
+      <div className="font-mono text-lg font-bold tabular-nums text-ink">
         {value}
       </div>
-      <div className="text-[10px] font-bold uppercase tracking-wide text-black/60">
+      <div className="font-mono text-[10px] uppercase tracking-wider text-muted">
         {label}
       </div>
     </div>

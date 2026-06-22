@@ -37,9 +37,9 @@ export default async function MatterPage({
     <div className="space-y-8">
       <Link
         href="/legislation"
-        className="inline-block font-bold text-black underline decoration-2 underline-offset-2 hover:text-main"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-muted transition-colors hover:text-accent"
       >
-        ← Back to legislation
+        <span aria-hidden>&larr;</span> Back to legislation
       </Link>
 
       {/* Header */}
@@ -47,25 +47,25 @@ export default async function MatterPage({
         <div className="flex flex-wrap items-center gap-2">
           <TypePill type={m.type} />
           {m.file ? (
-            <span className="font-mono text-sm font-bold text-black/50">
-              #{m.file}
-            </span>
+            <span className="font-mono text-sm text-faint">#{m.file}</span>
           ) : null}
           {m.status ? (
-            <span className="rounded-base border-2 border-border bg-bg px-2 py-0.5 text-xs font-bold text-black">
+            <span className="rounded border border-line px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wide text-muted">
               {m.status}
             </span>
           ) : null}
         </div>
 
         {m.summary ? (
-          <div className="mt-4 rounded-base border-2 border-border bg-main p-4 shadow-nbsm">
-            <div className="mb-1 text-[11px] font-heading uppercase tracking-wide text-black">
+          <div className="mt-5 rounded-lg border border-line bg-accentWash p-4">
+            <div className="mb-1.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-accent-ink">
               In plain English
             </div>
-            <p className="text-lg font-heading text-black">{m.summary}</p>
+            <p className="text-lg font-semibold leading-snug text-ink">
+              {m.summary}
+            </p>
             {m.summarySource === "heuristic" ? (
-              <p className="mt-2 text-[11px] font-bold text-black/60">
+              <p className="mt-2 text-xs text-muted">
                 Auto-generated from the official title. Add an LLM key for richer
                 summaries.
               </p>
@@ -73,33 +73,31 @@ export default async function MatterPage({
           </div>
         ) : null}
 
-        <h1 className="mt-4 text-base font-medium leading-relaxed text-black/80">
+        <h1 className="mt-5 text-base font-normal leading-relaxed text-muted">
           {m.title}
         </h1>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-1.5">
           {m.topics.map((t) => (
             <TopicChip
               key={t.topic.slug}
-              emoji={t.topic.emoji}
               name={t.topic.name}
-              color={t.topic.color}
               href={`/legislation?topic=${t.topic.slug}`}
             />
           ))}
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 border-t-2 border-border pt-4 text-sm">
+        <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line pt-4 text-sm">
           <Meta label="Introduced" value={fmtDate(m.introDate)} />
           <Meta label="Final action" value={fmtDate(m.finalDate)} />
           {sponsors.length > 0 ? (
-            <div className="text-sm font-bold">
-              <span className="text-black/50">Sponsors: </span>
+            <div className="text-sm">
+              <span className="text-faint">Sponsors: </span>
               {sponsors.map((s, i) => (
                 <span key={s.supervisorId}>
                   <Link
                     href={`/supervisors/${s.supervisor.slug}`}
-                    className="text-black underline decoration-2 underline-offset-2 hover:text-main"
+                    className="font-medium text-ink underline decoration-line decoration-2 underline-offset-2 hover:text-accent hover:decoration-accent"
                   >
                     {s.supervisor.fullName}
                   </Link>
@@ -113,9 +111,9 @@ export default async function MatterPage({
               href={m.sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-bold text-main underline decoration-2 underline-offset-2"
+              className="font-medium text-accent underline decoration-2 underline-offset-2"
             >
-              Official record ↗
+              Official record &#8599;
             </a>
           ) : null}
         </div>
@@ -123,9 +121,9 @@ export default async function MatterPage({
 
       {/* Roll-call votes */}
       <section>
-        <SectionTitle kicker="The roll call">How they voted</SectionTitle>
+        <SectionTitle>How they voted</SectionTitle>
         {actionsWithVotes.length === 0 ? (
-          <div className="nb-card p-6 text-sm font-bold text-black/60">
+          <div className="nb-card p-6 text-sm text-muted">
             No recorded roll-call vote yet. This item may have passed without a
             recorded individual vote, or is still pending.
           </div>
@@ -140,25 +138,28 @@ export default async function MatterPage({
               const aye = votes.filter((v) => v.value === "Aye").length;
               const no = votes.filter((v) => v.value === "No").length;
               const other = votes.length - aye - no;
+              const passed = a.result && /pass|adopt|approv/i.test(a.result);
+              const failed = a.result && /fail|reject/i.test(a.result);
               return (
                 <div key={a.id} className="nb-card p-5">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <div className="font-heading text-black">
+                      <div className="font-semibold text-ink">
                         {a.actionText || "Action"}
                       </div>
-                      <div className="text-xs font-bold text-black/60">
-                        {a.bodyName} · {fmtDate(a.date)}
+                      <div className="mt-0.5 flex items-center gap-2 font-mono text-xs text-muted">
+                        <span>
+                          {a.bodyName} · {fmtDate(a.date)}
+                        </span>
                         {a.result ? (
                           <span
-                            className="ml-2 inline-block rounded-base border-2 border-border px-1.5 font-heading text-black"
-                            style={{
-                              background: /pass|adopt|approv/i.test(a.result)
-                                ? "var(--win)"
-                                : /fail|reject/i.test(a.result)
-                                  ? "var(--loss)"
-                                  : "#fff",
-                            }}
+                            className={`rounded px-1.5 py-0.5 font-semibold uppercase tracking-wide ${
+                              passed
+                                ? "bg-yeaWash text-yea"
+                                : failed
+                                  ? "bg-nayWash text-nay"
+                                  : "bg-neutralWash text-muted"
+                            }`}
                           >
                             {a.result}
                           </span>
@@ -173,7 +174,7 @@ export default async function MatterPage({
                       <Link
                         key={v.id}
                         href={`/supervisors/${v.supervisor.slug}`}
-                        className="flex items-center gap-2 rounded-base border-2 border-border bg-bw p-2 transition-transform hover:-translate-y-0.5"
+                        className="flex items-center gap-2 rounded-md border border-line bg-surface p-2 transition-colors hover:border-line-strong"
                       >
                         <Avatar
                           name={v.supervisor.fullName}
@@ -181,23 +182,23 @@ export default async function MatterPage({
                           size={30}
                         />
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-xs font-bold text-black">
+                          <div className="truncate text-xs font-medium text-ink">
                             {v.supervisor.fullName}
                           </div>
-                          <div className="text-[10px] font-bold text-black/50">
+                          <div className="font-mono text-[10px] text-faint">
                             D{v.supervisor.district}
                           </div>
                         </div>
                         <span
-                          className={`rounded-base border-2 border-border px-1.5 text-xs font-heading ${voteBg(
+                          className={`rounded px-1.5 py-0.5 font-mono text-[11px] font-semibold ${voteBg(
                             v.value,
                           )}`}
                         >
                           {v.value === "Aye"
-                            ? "✓"
+                            ? "AYE"
                             : v.value === "No"
-                              ? "✕"
-                              : v.value[0]}
+                              ? "NO"
+                              : v.value.slice(0, 3).toUpperCase()}
                         </span>
                       </Link>
                     ))}
@@ -212,19 +213,19 @@ export default async function MatterPage({
       {/* Full history */}
       {m.actions.length > 0 && (
         <section>
-          <SectionTitle kicker="Paper trail">Full action history</SectionTitle>
-          <div className="nb-card divide-y-2 divide-border">
+          <SectionTitle>Full action history</SectionTitle>
+          <div className="nb-card divide-y divide-line">
             {m.actions.map((a) => (
-              <div key={a.id} className="flex items-start gap-3 p-3 text-sm">
-                <span className="w-24 shrink-0 text-xs font-bold text-black/50">
+              <div key={a.id} className="flex items-start gap-3 p-4 text-sm">
+                <span className="w-24 shrink-0 font-mono text-xs text-faint">
                   {fmtDate(a.date)}
                 </span>
-                <span className="flex-1 font-medium text-black/80">
-                  <span className="font-bold text-black/50">{a.bodyName}: </span>
+                <span className="flex-1 leading-relaxed text-ink">
+                  <span className="text-faint">{a.bodyName}: </span>
                   {a.actionText || "—"}
                 </span>
                 {a.result ? (
-                  <span className="shrink-0 text-xs font-bold text-black/70">
+                  <span className="shrink-0 font-mono text-xs text-muted">
                     {a.result}
                   </span>
                 ) : null}
@@ -239,9 +240,9 @@ export default async function MatterPage({
 
 function Meta({ label, value }: { label: string; value: string }) {
   return (
-    <div className="text-sm font-bold">
-      <span className="text-black/50">{label}: </span>
-      <span className="text-black">{value}</span>
+    <div className="text-sm">
+      <span className="text-faint">{label}: </span>
+      <span className="font-medium text-ink">{value}</span>
     </div>
   );
 }
