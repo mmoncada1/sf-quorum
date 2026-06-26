@@ -13,12 +13,15 @@
 
 /**
  * Absolute monthly targets that earn a full 100 in each count-based pillar.
- * Calibrated so a highly productive supervisor reaches ~100 and the typical
- * member lands in a sensible middle band. These are normative bars, not
- * derived from the current roster, so scores are stable over time.
+ * Calibrated against observed SF BOS output across a 2-year rolling window:
+ * the most prolific supervisor historically reaches ~10–11 impact / 11 activity
+ * per month, so targets are set just above that ceiling so only genuine
+ * outliers cap out at 100 and the typical member lands in the 40–60 range.
+ * These are normative bars, not derived from the current roster, so scores
+ * are stable over time.
  */
-const ACTIVITY_TARGET_PER_MONTH = 5; // authored-bill-equivalents / month
-const IMPACT_TARGET_PER_MONTH = 3.5; // weighted passed/substantive work / month
+const ACTIVITY_TARGET_PER_MONTH = 10; // authored-bill-equivalents / month
+const IMPACT_TARGET_PER_MONTH = 8; // weighted passed/substantive work / month
 
 function pct(rate: number, target: number): number {
   if (target <= 0) return 0;
@@ -87,10 +90,15 @@ export function scoreCohort(raws: RawStats[]): ScoredStats[] {
     // Procedural housekeeping counts, but only a quarter as much as real bills.
     const activityVolume =
       r.sponsored - 0.75 * r.proceduralSponsored + 0.4 * r.cosponsored;
-    // Impact rewards getting substantive things passed, not procedural/symbolic volume.
+    // Impact: substantive work introduced is the primary driver (full credit),
+    // with a bonus for each bill that becomes law (+0.5) — so a passed bill
+    // ultimately earns 1.5 and a still-pending bill earns 1.0.  Keeping pending
+    // work at full credit rather than 0.5 ensures new supervisors aren't
+    // structurally penalized just because the legislative calendar hasn't had
+    // time to move their bills yet.
     const impactVolume =
-      r.passedSubstantiveSponsored * 1.0 +
-      r.substantiveSponsored * 0.5 +
+      r.substantiveSponsored * 1.0 +
+      r.passedSubstantiveSponsored * 0.5 +
       r.cosponsored * 0.15;
     // Normalize by time served so a newer member isn't penalized for fewer
     // chances to legislate: these become "per month in office" rates.

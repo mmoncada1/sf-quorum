@@ -16,6 +16,33 @@ export function parseTopTopics(json: string | null | undefined): TopTopic[] {
   }
 }
 
+export interface OriginStep {
+  date: string | null;
+  actor: string;
+  title: string;
+  detail: string;
+  source?: string;
+}
+
+export interface OriginTimeline {
+  lead: string;
+  steps: OriginStep[];
+}
+
+export function parseOriginTimeline(
+  json: string | null | undefined,
+): OriginTimeline | null {
+  if (!json) return null;
+  try {
+    const parsed = JSON.parse(json) as OriginTimeline;
+    if (!parsed || !Array.isArray(parsed.steps) || parsed.steps.length === 0)
+      return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
 export async function getOverview() {
   const [matters, votes, meetings, supervisors, lastIngest] = await Promise.all([
     prisma.matter.count(),
@@ -54,14 +81,71 @@ function tally(votes: { value: string }[]) {
   return t;
 }
 
-export async function getRecentMatters(limit = 30, topicSlug?: string) {
+export async function getAvailableYears(): Promise<number[]> {
+  // Use action dates so the filter matches "matters heard in this year"
+  // rather than "matters introduced in this year."
+  const rows = await prisma.action.findMany({
+    select: { date: true },
+    where: { date: { not: null } },
+  });
+  const years = new Set<number>();
+  for (const { date } of rows) {
+    if (date) years.add(date.getUTCFullYear());
+  }
+  return Array.from(years).sort((a, b) => b - a);
+}
+
+export async function getAvailableMonths(year: number): Promise<number[]> {
+  const start = new Date(Date.UTC(year, 0, 1));
+  const end = new Date(Date.UTC(year + 1, 0, 1));
+  const rows = await prisma.action.findMany({
+    select: { date: true },
+    where: { date: { gte: start, lt: end } },
+  });
+  const months = new Set<number>();
+  for (const { date } of rows) {
+    if (date) months.add(date.getUTCMonth() + 1); // 1–12
+  }
+  return Array.from(months).sort((a, b) => b - a); // most recent first
+}
+
+export async function getRecentMatters(
+  limit = 30,
+  topicSlug?: string,
+  year?: number,
+  month?: number,
+) {
+  // Filter by action date so "2025" means "matters heard in 2025,"
+  // not just "matters introduced in 2025."
+  let actionDateRange: { gte: Date; lt: Date } | undefined;
+  if (year) {
+    const startM = month ? month - 1 : 0;
+    actionDateRange = {
+      gte: new Date(Date.UTC(year, startM, 1)),
+      lt: month
+        ? new Date(Date.UTC(year, month, 1))
+        : new Date(Date.UTC(year + 1, 0, 1)),
+    };
+  }
+
+  const dateFilter = actionDateRange
+    ? { actions: { some: { date: actionDateRange } } }
+    : undefined;
+
+  const topicFilter = topicSlug
+    ? { topics: { some: { topic: { slug: topicSlug } } } }
+    : undefined;
+
   const matters = await prisma.matter.findMany({
-    where: topicSlug
-      ? { topics: { some: { topic: { slug: topicSlug } } } }
-      : undefined,
+    where: { ...topicFilter, ...dateFilter },
     include: {
       topics: { include: { topic: true } },
-      actions: { select: { date: true } },
+      // When a date window is active, restrict the fetched actions to that window.
+      // This means m.actions only contains in-period rows, so lastActivity is
+      // automatically scoped to the selected year/month — no JS re-filtering needed.
+      actions: actionDateRange
+        ? { where: { date: actionDateRange }, select: { date: true } }
+        : { select: { date: true } },
       votes: { select: { value: true } },
       sponsorships: { include: { supervisor: true } },
     },
@@ -71,12 +155,16 @@ export async function getRecentMatters(limit = 30, topicSlug?: string) {
     const actionDates = m.actions
       .map((a) => a.date?.getTime() ?? 0)
       .filter(Boolean);
-    const lastActivity = Math.max(
-      m.introDate?.getTime() ?? 0,
-      m.finalDate?.getTime() ?? 0,
-      ...actionDates,
-      0,
-    );
+    // When filtering by period, do NOT mix in introDate/finalDate — those can
+    // belong to a different year and would push the sort date out of the window.
+    const lastActivity = actionDateRange
+      ? Math.max(...actionDates, 0)
+      : Math.max(
+          m.introDate?.getTime() ?? 0,
+          m.finalDate?.getTime() ?? 0,
+          ...actionDates,
+          0,
+        );
     return { m, lastActivity, tally: tally(m.votes) };
   });
 
@@ -96,6 +184,42 @@ export async function getMatter(legistarId: number) {
           votes: { include: { supervisor: true } },
         },
         orderBy: { date: "desc" },
+      },
+      attachments: { orderBy: { id: "asc" } },
+      relationsFrom: {
+        include: {
+          to: {
+            select: {
+              legistarId: true,
+              file: true,
+              type: true,
+              status: true,
+              title: true,
+              summary: true,
+              introDate: true,
+              finalDate: true,
+              sponsorships: { include: { supervisor: { select: { fullName: true, slug: true } } } },
+            },
+          },
+        },
+      },
+      // Also surface matters that reference THIS one, so we can show successors.
+      relationsTo: {
+        include: {
+          from: {
+            select: {
+              legistarId: true,
+              file: true,
+              type: true,
+              status: true,
+              title: true,
+              summary: true,
+              introDate: true,
+              finalDate: true,
+              sponsorships: { include: { supervisor: { select: { fullName: true, slug: true } } } },
+            },
+          },
+        },
       },
     },
   });

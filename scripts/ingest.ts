@@ -167,12 +167,14 @@ async function run() {
           introDate: detail.introDate,
           finalDate: detail.finalDate,
           sourceUrl: detail.sourceUrl,
+          inControl: detail.inControl || null,
         },
         update: {
           type: detail.type,
           status: detail.status,
           title: detail.title || detail.name,
           finalDate: detail.finalDate,
+          inControl: detail.inControl || null,
         },
       });
       if (!processedMatters.has(item.legistarId)) counters.matters++;
@@ -190,6 +192,32 @@ async function run() {
             role: i === 0 ? "sponsor" : "cosponsor",
           },
           update: {},
+        });
+      }
+
+      // Related files (predecessor / associated legislation).
+      for (const rf of detail.relatedFiles) {
+        const relatedMatter = await prisma.matter.findUnique({
+          where: { legistarId: rf.legistarId },
+          select: { id: true },
+        });
+        await prisma.matterRelation.upsert({
+          where: { fromId_toFile: { fromId: matter.id, toFile: rf.fileNum } },
+          create: {
+            fromId: matter.id,
+            toFile: rf.fileNum,
+            toLegistarId: relatedMatter?.id ?? null,
+          },
+          update: { toLegistarId: relatedMatter?.id ?? null },
+        });
+      }
+
+      // Attachments (named documents whose names reveal external-body reviews).
+      for (const att of detail.attachments) {
+        await prisma.matterAttachment.upsert({
+          where: { matterId_name: { matterId: matter.id, name: att.name } },
+          create: { matterId: matter.id, name: att.name, url: att.url },
+          update: { url: att.url },
         });
       }
 

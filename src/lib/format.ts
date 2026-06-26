@@ -37,6 +37,17 @@ export function gradeBg(grade: string | null | undefined): string {
   return "bg-nayWash text-nay";
 }
 
+/** 4 px colored left-border accent for cards and list rows, keyed by grade.
+ *  The `!` prefix forces border-left-color to win over nb-card's border-color shorthand. */
+export function gradeBorder(grade: string | null | undefined): string {
+  if (!grade) return "border-l-4 !border-l-line";
+  if (grade.startsWith("A")) return "border-l-4 !border-l-yea";
+  if (grade.startsWith("B")) return "border-l-4 !border-l-slate";
+  if (grade.startsWith("C")) return "border-l-4 !border-l-amber";
+  if (grade.startsWith("D")) return "border-l-4 !border-l-accent";
+  return "border-l-4 !border-l-nay"; // F
+}
+
 /** Tinted wash + dark text for a matter's lifecycle status. */
 export function statusTone(status: string | null | undefined): string {
   if (!status) return "bg-neutralWash text-muted";

@@ -1,0 +1,226 @@
+// SF Quorum data model
+// Source of truth: San Francisco Board of Supervisors via sfgov.legistar.com
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// A district supervisor (current or former member of the Board).
+model Supervisor {
+  id         Int       @id @default(autoincrement())
+  legistarId Int?      @unique // Legistar PersonId when known
+  slug       String    @unique
+  fullName   String
+  district   Int? // 1..11, null for at-large/mayor/clerk roles
+  title      String? // e.g. "Supervisor", "President of the Board"
+  party      String? // usually nonpartisan in SF; kept for completeness
+  active     Boolean   @default(true)
+  photoUrl   String?
+  bio        String?
+  email      String?
+  website    String?
+  termStart  DateTime?
+  termEnd    DateTime?
+
+  votes        Vote[]
+  sponsorships Sponsorship[]
+  stats        SupervisorStat?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// A piece of legislation (ordinance, resolution, motion, hearing, etc.).
+model Matter {
+  id            Int       @id @default(autoincrement())
+  legistarId    Int       @unique // LegislationDetail ID
+  legistarGuid  String?
+  file          String? // e.g. "250123"
+  type          String? // Ordinance / Resolution / Motion / Hearing ...
+  status        String?
+  title         String // official title
+  summary       String? // plain-English ("ELI5") summary
+  summarySource String? // "llm" | "heuristic"
+  fullText      String? // best-effort extracted body text
+  introDate     DateTime?
+  finalDate     DateTime?
+  sourceUrl     String?
+  inControl     String? // committee or body currently holding the matter
+
+  // Narrative origin story synthesized from attached documents (legislative
+  // digest, department transmittals, commission resolutions) + action history.
+  originTimeline    String? // JSON: { lead: string, steps: OriginStep[] }
+  originGeneratedAt DateTime?
+
+  topics        MatterTopic[]
+  votes         Vote[] // votes belong to actions but we denormalize matter
+  actions       Action[]
+  sponsorships  Sponsorship[]
+  attachments   MatterAttachment[]
+  relationsFrom MatterRelation[]   @relation("RelationFrom")
+  relationsTo   MatterRelation[]   @relation("RelationTo")
+
+  importance Float? // computed 0..1 weight used in scoring
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// A named document attached to a matter on Legistar (e.g. "HPC Reso No. 1565", "PLN Transmittal").
+model MatterAttachment {
+  id       Int     @id @default(autoincrement())
+  matterId Int
+  name     String
+  url      String?
+  matter   Matter  @relation(fields: [matterId], references: [id], onDelete: Cascade)
+
+  @@unique([matterId, name])
+}
+
+/// A directional reference from one matter to a related/predecessor matter.
+model MatterRelation {
+  id           Int    @id @default(autoincrement())
+  fromId       Int
+  toFile       String // referenced file number as text (e.g. "260189")
+  toLegistarId Int? // FK to related Matter if we have it in the DB
+
+  from Matter  @relation("RelationFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to   Matter? @relation("RelationTo", fields: [toLegistarId], references: [id])
+
+  @@unique([fromId, toFile])
+}
+
+/// A scheduled meeting / hearing of the Board or one of its committees.
+model Meeting {
+  id           Int       @id @default(autoincrement())
+  legistarId   Int       @unique // MeetingDetail ID
+  legistarGuid String?
+  bodyName     String // e.g. "Board of Supervisors", committee name
+  date         DateTime?
+  location     String?
+  sourceUrl    String?
+  actions      Action[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// A recorded action taken on a matter at a meeting (a "history" row in Legistar).
+/// This is the unit that carries a roll-call vote.
+model Action {
+  id           Int       @id @default(autoincrement())
+  legistarId   Int       @unique // HistoryDetail ID
+  legistarGuid String?
+  date         DateTime?
+  actionText   String?
+  result       String? // "Pass", "Fail", etc.
+  bodyName     String?
+
+  matterId  Int
+  matter    Matter   @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  meetingId Int?
+  meeting   Meeting? @relation(fields: [meetingId], references: [id])
+
+  votes Vote[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// A single supervisor's vote on a single action.
+model Vote {
+  id    Int    @id @default(autoincrement())
+  value String // "Aye" | "No" | "Excused" | "Absent" | "Recused" | "Abstain" | "Present"
+
+  actionId     Int
+  action       Action     @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  matterId     Int
+  matter       Matter     @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  supervisorId Int
+  supervisor   Supervisor @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([actionId, supervisorId])
+  @@index([supervisorId])
+  @@index([matterId])
+}
+
+/// Authorship / sponsorship of a matter by a supervisor.
+model Sponsorship {
+  id   Int    @id @default(autoincrement())
+  role String @default("sponsor") // "sponsor" | "cosponsor"
+
+  matterId     Int
+  matter       Matter     @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  supervisorId Int
+  supervisor   Supervisor @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
+
+  @@unique([matterId, supervisorId])
+}
+
+/// A policy topic / focus area (e.g. Housing, Public Safety, Transit).
+model Topic {
+  id      Int           @id @default(autoincrement())
+  slug    String        @unique
+  name    String
+  emoji   String?
+  color   String?
+  matters MatterTopic[]
+}
+
+model MatterTopic {
+  matterId Int
+  topicId  Int
+  weight   Float  @default(1)
+  matter   Matter @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  topic    Topic  @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([matterId, topicId])
+}
+
+/// Pre-computed "athlete" stats per supervisor for the leaderboard / dossier.
+model SupervisorStat {
+  supervisorId Int        @id
+  supervisor   Supervisor @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
+
+  totalVotes      Int   @default(0)
+  ayes            Int   @default(0)
+  noes            Int   @default(0)
+  absences        Int   @default(0) // Absent + Excused
+  attendanceRate  Float @default(0) // 0..1
+  dissentRate     Float @default(0) // share of votes against the majority
+  sponsored       Int   @default(0)
+  cosponsored     Int   @default(0)
+  passedSponsored Int   @default(0)
+
+  // Headline scores (0..100)
+  impactScore   Float   @default(0)
+  activityScore Float   @default(0)
+  independence  Float   @default(0)
+  overallScore  Float   @default(0)
+  rank          Int?
+  grade         String? // A+ .. F
+
+  topTopicsJson String? // JSON: [{slug,name,emoji,count}]
+  updatedAt     DateTime @updatedAt
+}
+
+/// Bookkeeping for ingestion runs.
+model IngestLog {
+  id         Int       @id @default(autoincrement())
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  meetings   Int       @default(0)
+  matters    Int       @default(0)
+  actions    Int       @default(0)
+  votes      Int       @default(0)
+  note       String?
+}

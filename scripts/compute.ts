@@ -29,21 +29,31 @@ async function run() {
     }
   }
 
-  // The dataset is effectively the current session: measure pace over the
-  // calendar year that holds the bulk of the data.
+  // Use a rolling 2-year window so the exposure denominator matches the data
+  // coverage period. Before this fix windowStart was Jan 1 of the current year
+  // (~6 months), but vote/sponsorship counts spanned years of ingested data,
+  // causing every per-month rate to blow past the target and grade everyone A+.
+  // Filtering votes and sponsorships to the same window keeps numerators and
+  // denominators consistent as the dataset grows.
+  const LOOKBACK_YEARS = 2;
+
   const lastAction = await prisma.action.findFirst({
     where: { date: { not: null } },
     orderBy: { date: "desc" },
     select: { date: true },
   });
   const windowEnd = lastAction?.date ?? new Date();
-  const windowStart = new Date(Date.UTC(windowEnd.getUTCFullYear(), 0, 1));
+  const windowStart = new Date(
+    Date.UTC(windowEnd.getUTCFullYear() - LOOKBACK_YEARS, 0, 1),
+  );
   const exposureFor = (termStart: Date | null | undefined): number => {
     const start = termStart && termStart > windowStart ? termStart : windowStart;
     return Math.max(1, monthsBetween(start, windowEnd));
   };
 
+  // Only count votes cast within the window so the rate denominators align.
   const votes = await prisma.vote.findMany({
+    where: { action: { date: { gte: windowStart } } },
     select: { supervisorId: true, value: true, actionId: true },
   });
 
@@ -56,7 +66,9 @@ async function run() {
     tally.set(v.actionId, t);
   }
 
+  // Only count sponsorships of matters introduced within the window.
   const sponsorships = await prisma.sponsorship.findMany({
+    where: { matter: { introDate: { gte: windowStart } } },
     include: {
       matter: {
         select: {

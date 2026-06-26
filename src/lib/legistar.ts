@@ -51,6 +51,17 @@ export interface ActionRef {
   result: string;
 }
 
+export interface RelatedFileRef {
+  legistarId: number;
+  guid: string;
+  fileNum: string;
+}
+
+export interface AttachmentRef {
+  name: string;
+  url: string;
+}
+
 export interface MatterDetail {
   legistarId: number;
   guid: string;
@@ -61,8 +72,11 @@ export interface MatterDetail {
   name: string;
   introDate: Date | null;
   finalDate: Date | null;
+  inControl: string;
   sponsors: string[];
   actions: ActionRef[];
+  relatedFiles: RelatedFileRef[];
+  attachments: AttachmentRef[];
   sourceUrl: string;
 }
 
@@ -356,6 +370,43 @@ export async function getMatterDetail(
     });
   }
 
+  // In control: the committee or body currently holding the matter.
+  const inControl = txt("lblInControl2");
+
+  // Related files: other LegislationDetail.aspx links on this page that are
+  // not a self-reference (these appear only in the "Related files:" section).
+  const relatedFiles: RelatedFileRef[] = [];
+  const seenRelated = new Set<number>();
+  $("a[href*='LegislationDetail.aspx']").each((_, a) => {
+    const href = $(a).attr("href") || "";
+    const rm = href.match(
+      /LegislationDetail\.aspx\?ID=(\d+)&(?:amp;)?GUID=([0-9A-F-]+)/i,
+    );
+    if (!rm) return;
+    const rid = Number(rm[1]);
+    if (rid === ref.legistarId || seenRelated.has(rid)) return;
+    seenRelated.add(rid);
+    relatedFiles.push({
+      legistarId: rid,
+      guid: rm[2],
+      fileNum: clean($(a).text()),
+    });
+  });
+
+  // Attachments: View.ashx document links (PDFs attached to the matter).
+  // Their names (e.g. "HPC Reso No. 1565 052526", "PLN Transmittal 061026")
+  // reveal which external bodies already reviewed the legislation.
+  const attachments: AttachmentRef[] = [];
+  const seenAtt = new Set<string>();
+  $("a[href*='View.ashx']").each((_, a) => {
+    const attName = clean($(a).text());
+    const href = $(a).attr("href") || "";
+    if (!attName || seenAtt.has(attName)) return;
+    seenAtt.add(attName);
+    const attUrl = href.startsWith("http") ? href : `${HOST}/${href}`;
+    attachments.push({ name: attName, url: attUrl });
+  });
+
   return {
     legistarId: ref.legistarId,
     guid: ref.guid,
@@ -366,8 +417,11 @@ export async function getMatterDetail(
     name,
     introDate,
     finalDate,
+    inControl,
     sponsors,
     actions,
+    relatedFiles,
+    attachments,
     sourceUrl,
   };
 }

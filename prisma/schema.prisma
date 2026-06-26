@@ -3,6 +3,7 @@
 
 generator client {
   provider      = "prisma-client-js"
+  output        = "../src/generated/prisma"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
@@ -51,16 +52,49 @@ model Matter {
   introDate     DateTime?
   finalDate     DateTime?
   sourceUrl     String?
+  inControl     String? // committee or body currently holding the matter
 
-  topics       MatterTopic[]
-  votes        Vote[] // votes belong to actions but we denormalize matter
-  actions      Action[]
-  sponsorships Sponsorship[]
+  // Narrative origin story synthesized from attached documents (legislative
+  // digest, department transmittals, commission resolutions) + action history.
+  originTimeline    String?   // JSON: { lead: string, steps: OriginStep[] }
+  originGeneratedAt DateTime?
+
+  topics        MatterTopic[]
+  votes         Vote[] // votes belong to actions but we denormalize matter
+  actions       Action[]
+  sponsorships  Sponsorship[]
+  attachments   MatterAttachment[]
+  relationsFrom MatterRelation[] @relation("RelationFrom")
+  relationsTo   MatterRelation[] @relation("RelationTo")
 
   importance Float? // computed 0..1 weight used in scoring
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// A named document attached to a matter on Legistar (e.g. "HPC Reso No. 1565", "PLN Transmittal").
+model MatterAttachment {
+  id       Int     @id @default(autoincrement())
+  matterId Int
+  name     String
+  url      String?
+  matter   Matter  @relation(fields: [matterId], references: [id], onDelete: Cascade)
+
+  @@unique([matterId, name])
+}
+
+/// A directional reference from one matter to a related/predecessor matter.
+model MatterRelation {
+  id           Int     @id @default(autoincrement())
+  fromId       Int
+  toFile       String  // referenced file number as text (e.g. "260189")
+  toLegistarId Int?    // FK to related Matter if we have it in the DB
+
+  from Matter  @relation("RelationFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to   Matter? @relation("RelationTo", fields: [toLegistarId], references: [id])
+
+  @@unique([fromId, toFile])
 }
 
 /// A scheduled meeting / hearing of the Board or one of its committees.

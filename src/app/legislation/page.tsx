@@ -1,17 +1,42 @@
 import Link from "next/link";
-import { getRecentMatters } from "@/lib/queries";
+import { getRecentMatters, getAvailableYears, getAvailableMonths } from "@/lib/queries";
 import { MatterCard } from "@/components/matter-card";
 import { TOPICS, TOPIC_BY_SLUG } from "@/lib/topics";
 
 export const dynamic = "force-dynamic";
 
+const MONTH_NAMES = [
+  "", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+function buildHref(params: { topic?: string; year?: string; month?: string }) {
+  const parts: string[] = [];
+  if (params.topic) parts.push(`topic=${params.topic}`);
+  if (params.year) parts.push(`year=${params.year}`);
+  if (params.month) parts.push(`month=${params.month}`);
+  return parts.length ? `/legislation?${parts.join("&")}` : "/legislation";
+}
+
 export default async function LegislationPage({
   searchParams,
 }: {
-  searchParams: { topic?: string };
+  searchParams: { topic?: string; year?: string; month?: string };
 }) {
   const topic = searchParams.topic;
-  const matters = await getRecentMatters(80, topic);
+  const yearParam = searchParams.year ? parseInt(searchParams.year, 10) : undefined;
+  const year = yearParam && !isNaN(yearParam) ? yearParam : undefined;
+  const monthParam = searchParams.month ? parseInt(searchParams.month, 10) : undefined;
+  const month = monthParam && !isNaN(monthParam) && monthParam >= 1 && monthParam <= 12
+    ? monthParam
+    : undefined;
+
+  const [matters, availableYears, availableMonths] = await Promise.all([
+    getRecentMatters(80, topic, year, month),
+    getAvailableYears(),
+    year ? getAvailableMonths(year) : Promise.resolve([]),
+  ]);
+
   const activeTopic = topic ? TOPIC_BY_SLUG[topic] : null;
 
   return (
@@ -23,25 +48,80 @@ export default async function LegislationPage({
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-muted">
           Everything moving through the Board and its committees, newest first,
-          each translated into plain English. Filter by policy area.
+          each translated into plain English. Filter by policy area, year, or month.
         </p>
       </header>
 
-      <div className="flex flex-wrap gap-2">
-        <FilterPill href="/legislation" active={!topic} label="All" />
-        {TOPICS.map((t) => (
+      <div className="space-y-3">
+        {/* Topic filter */}
+        <div className="flex flex-wrap gap-2">
           <FilterPill
-            key={t.slug}
-            href={`/legislation?topic=${t.slug}`}
-            active={topic === t.slug}
-            label={t.name}
+            href={buildHref({ year: searchParams.year, month: searchParams.month })}
+            active={!topic}
+            label="All topics"
           />
-        ))}
+          {TOPICS.map((t) => (
+            <FilterPill
+              key={t.slug}
+              href={buildHref({ topic: t.slug, year: searchParams.year, month: searchParams.month })}
+              active={topic === t.slug}
+              label={t.name}
+            />
+          ))}
+        </div>
+
+        {/* Year filter */}
+        {availableYears.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <FilterPill
+              href={buildHref({ topic })}
+              active={!year}
+              label="All years"
+            />
+            {availableYears.map((y) => (
+              <FilterPill
+                key={y}
+                href={buildHref({ topic, year: String(y) })}
+                active={year === y}
+                label={String(y)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Month filter — only visible when a year is selected */}
+        {year && availableMonths.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <FilterPill
+              href={buildHref({ topic, year: String(year) })}
+              active={!month}
+              label="All months"
+            />
+            {availableMonths.map((m) => (
+              <FilterPill
+                key={m}
+                href={buildHref({ topic, year: String(year), month: String(m) })}
+                active={month === m}
+                label={MONTH_NAMES[m]}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      {activeTopic ? (
+      {(activeTopic || year || month) ? (
         <p className="text-sm text-muted">
-          Showing <span className="font-semibold text-ink">{activeTopic.name}</span>{" "}
+          Showing{" "}
+          {activeTopic && (
+            <span className="font-semibold text-ink">{activeTopic.name}</span>
+          )}
+          {activeTopic && (year || month) ? " · " : ""}
+          {month && year && (
+            <span className="font-semibold text-ink">{MONTH_NAMES[month]} {year}</span>
+          )}
+          {!month && year && (
+            <span className="font-semibold text-ink">{year}</span>
+          )}{" "}
           legislation ({matters.length}).
         </p>
       ) : null}
