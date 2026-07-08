@@ -15,7 +15,8 @@
     "enrich": "tsx scripts/enrich.ts",
     "compute": "tsx scripts/compute.ts",
     "timeline": "tsx scripts/timeline.ts",
-    "refresh": "tsx scripts/ingest.ts && tsx scripts/enrich.ts && tsx scripts/compute.ts && tsx scripts/timeline.ts"
+    "refresh": "tsx scripts/ingest.ts && tsx scripts/enrich.ts && tsx scripts/compute.ts && TIMELINE_RECENT_MEETINGS=${TIMELINE_RECENT_MEETINGS:-12} tsx scripts/timeline.ts",
+    "refresh:fast": "tsx scripts/ingest.ts && tsx scripts/enrich.ts && tsx scripts/compute.ts"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",

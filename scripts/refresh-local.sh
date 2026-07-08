@@ -21,6 +21,8 @@ cd "$PROJECT_DIR" || { echo "Project dir not found: $PROJECT_DIR"; exit 1; }
 mkdir -p .cache
 
 echo "===== $(date '+%Y-%m-%d %H:%M:%S') refresh start (node $(node -v 2>/dev/null)) ====="
+# Core data first (ingest/enrich/compute), then timelines only for matters in the
+# latest ingest window so a large backlog can't block the next scheduled run.
 npm run refresh
 status=$?
 echo "===== $(date '+%Y-%m-%d %H:%M:%S') refresh end (exit $status) ====="

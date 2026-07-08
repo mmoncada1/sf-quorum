@@ -7,6 +7,8 @@
  *   npm run timeline                 # matters with attachments, missing a timeline
  *   TIMELINE_FORCE=1 npm run timeline
  *   TIMELINE_FILE=260698 npm run timeline   # just one file number
+ *   TIMELINE_FILES=260755,260756 npm run timeline
+ *   TIMELINE_RECENT_MEETINGS=12 npm run timeline   # matters from latest ingest window
  *   TIMELINE_LIMIT=20 npm run timeline
  *
  * Requires OPENAI_API_KEY. PDF bytes + extracted text are cached under
@@ -20,6 +22,14 @@ import { generateOriginTimeline } from "../src/lib/origin";
 
 const FORCE = !!process.env.TIMELINE_FORCE;
 const ONLY_FILE = process.env.TIMELINE_FILE?.trim();
+const ONLY_FILES = (process.env.TIMELINE_FILES || "")
+  .split(",")
+  .map((f) => f.trim())
+  .filter(Boolean);
+const RECENT_MEETINGS = parseInt(
+  process.env.TIMELINE_RECENT_MEETINGS || "0",
+  10,
+);
 const LIMIT = parseInt(process.env.TIMELINE_LIMIT || "0", 10);
 
 function log(...args: unknown[]) {
@@ -40,7 +50,20 @@ async function run() {
     attachments: { some: {} },
   };
   if (ONLY_FILE) where.file = ONLY_FILE;
-  if (!FORCE && !ONLY_FILE) where.originTimeline = null;
+  else if (ONLY_FILES.length) where.file = { in: ONLY_FILES };
+  if (!FORCE && !ONLY_FILE && !ONLY_FILES.length)
+    where.originTimeline = null;
+
+  if (RECENT_MEETINGS > 0) {
+    const recent = await prisma.meeting.findMany({
+      orderBy: { date: "desc" },
+      take: RECENT_MEETINGS,
+      select: { id: true },
+    });
+    where.actions = {
+      some: { meetingId: { in: recent.map((m) => m.id) } },
+    };
+  }
 
   let matters = await prisma.matter.findMany({
     where,
